@@ -1,6 +1,6 @@
 # flutter_pullrefreshlayout
 
-PullRefreshLayout flutter 版本
+## PullRefreshLayout flutter 版本(保持Android、ios特性)
 
 
 ### how to use 
