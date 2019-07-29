@@ -1,11 +1,3 @@
 # flutter_pullrefreshlayout
 
-A new Flutter module.
-
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](https://flutter.dev/).
-# FlutterPullRefreshLayout
-# FlutterPullRefreshLayout
-# FlutterPullRefreshLayout
+PullRefreshLayout flutter 版本
