@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'pullrefresharound.dart';
 
 // ignore: must_be_immutable
-class PullRefreshLayoutPhysics extends ScrollPhysics {
+class PullRefreshPhysics extends ScrollPhysics {
   ScrollPhysics _scrollPhysics;
   ScrollPhysics _parent;
   PhysicsStatus _status;
@@ -35,7 +35,7 @@ class PullRefreshLayoutPhysics extends ScrollPhysics {
     return isPhysicsSame;
   }
 
-  PullRefreshLayoutPhysics({PhysicsStatus status, ScrollPhysics parent})
+  PullRefreshPhysics({PhysicsStatus status, ScrollPhysics parent})
       : super(parent: parent) {
     _parent = parent;
     this.status(status ?? PhysicsStatus.normal);
@@ -47,7 +47,7 @@ class PullRefreshLayoutPhysics extends ScrollPhysics {
   }
 
   @override
-  PullRefreshLayoutPhysics applyTo(ScrollPhysics ancestor) {
+  PullRefreshPhysics applyTo(ScrollPhysics ancestor) {
     if (_parent == null) {
       _parent = buildParent(ancestor);
     } else {

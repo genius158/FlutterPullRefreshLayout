@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pullrefreshlayout/pullrefreshlayout.dart';
 
-import 'pullrefreshlayoutphysics.dart';
+import 'pullrefreshphysics.dart';
 
 //void main() => Future.delayed(Duration(seconds: 5)).then((_) {
 //      runApp(MyApp());
@@ -68,8 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  PullRefreshLayoutPhysics _refreshLayoutPhysics =
-      new PullRefreshLayoutPhysics();
+  PullRefreshPhysics _refreshLayoutPhysics = new PullRefreshPhysics();
   String _text = "正常";
 
   @override
@@ -105,13 +104,15 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
             onPullHoldUnTrigger: (_) {
-              print("onPullHoldUnTriggeronPullHoldUnTriggeronPullHoldUnTrigger");
+              print(
+                  "onPullHoldUnTriggeronPullHoldUnTriggeronPullHoldUnTrigger");
               setState(() {
                 _text = "不触发";
               });
             },
             onPullHoldTrigger: (_) {
-              print("onPullHoldTriggeronPullHoldTriggeronPullHoldTriggeronPullHoldTrigger");
+              print(
+                  "onPullHoldTriggeronPullHoldTriggeronPullHoldTriggeronPullHoldTrigger");
               setState(() {
                 _text = "触发";
               });
@@ -120,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {
                 _text = "刷新";
               });
-                Future.delayed(Duration(seconds: 2)).then((_) {
+              Future.delayed(Duration(seconds: 2)).then((_) {
                 control.finishRefresh();
                 setState(() {
                   _text = "刷新完成";

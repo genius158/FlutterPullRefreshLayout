@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'pullrefresharound.dart';
-import 'pullrefreshlayoutphysics.dart';
+import 'pullrefreshphysics.dart';
 
 class PullRefreshLayout extends StatefulWidget {
   final Widget child;
@@ -306,7 +306,7 @@ class _PullRefreshRender extends RenderBox
 
   set onPullReset(onPullFinish) => _onPullFinish = onPullFinish;
 
-  PullRefreshLayoutPhysics get physics {
+  PullRefreshPhysics get physics {
     if (_scrollElement != null && _scrollElement.widget is Scrollable) {
       return (_scrollElement.widget as Scrollable).physics;
     }
