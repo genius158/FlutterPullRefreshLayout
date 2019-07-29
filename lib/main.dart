@@ -132,200 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
               _text,
               style: TextStyle(fontSize: 40),
             ),
-            child: ListView(
-              physics: _refreshLayoutPhysics,
-              children: <Widget>[
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-                Text(
-                  'You have pushed the button this many times:',
-                ),
-                Text(
-                  '$_counter',
-                  style: Theme.of(context).textTheme.display1,
-                ),
-              ],
-            ),
+            child: getScrollTest(),
           ),
         ),
       ),
@@ -335,5 +142,304 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  getListTest() {
+    return ListView(
+      physics: _refreshLayoutPhysics,
+      children: <Widget>[
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+        Text(
+          'You have pushed the button this many times:',
+        ),
+        Text(
+          '$_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+      ],
+    );
+  }
+
+  getScrollTest() {
+    return CustomScrollView(physics: _refreshLayoutPhysics, slivers: <Widget>[
+      new SliverToBoxAdapter(
+        child: new Container(
+          padding: EdgeInsets.only(top: 10, bottom: 10),
+          child: new Column(
+            children: <Widget>[
+              new SizedBox(
+                  child: new Text(
+                'SliverGrid',
+                style: new TextStyle(fontSize: 16),
+              )),
+              new Divider(
+                color: Colors.grey,
+                height: 20,
+              )
+            ],
+          ),
+        ),
+      ),
+      SliverGrid(
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 200.0,
+          mainAxisSpacing: 10.0,
+          crossAxisSpacing: 10.0,
+          childAspectRatio: 4.0,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return Container(
+              alignment: Alignment.center,
+              color: Colors.teal[100 * (index % 9)],
+              child: Text('SliverGrid item $index'),
+            );
+          },
+          childCount: 10,
+        ),
+      ),
+      new SliverToBoxAdapter(
+          child: new Container(
+        padding: EdgeInsets.only(top: 10, bottom: 10),
+        color: Colors.green,
+        child: new SizedBox(
+            child: new Text(
+          'SliverFixedExtentList',
+          style: new TextStyle(fontSize: 16),
+        )),
+      )),
+      SliverFixedExtentList(
+        itemExtent: 50.0,
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return Container(
+              alignment: Alignment.center,
+              color: Colors.lightBlue[100 * (index % 9)],
+              child: Text('SliverFixedExtentList item $index'),
+            );
+          },
+          childCount: 20,
+        ),
+      ),
+      new SliverToBoxAdapter(
+          child: new Container(
+        padding: EdgeInsets.only(top: 10, bottom: 10),
+        color: Colors.green,
+        child: new SizedBox(
+            child: new Text(
+          'SliverGrid',
+          style: new TextStyle(fontSize: 16),
+        )),
+      )),
+      SliverGrid(
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 200.0,
+          mainAxisSpacing: 10.0,
+          crossAxisSpacing: 10.0,
+          childAspectRatio: 4.0,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return Container(
+              alignment: Alignment.center,
+              color: Colors.teal[100 * (index % 9)],
+              child: Text('SliverGrid item2 $index'),
+            );
+          },
+          childCount: 20,
+        ),
+      ),
+      new SliverToBoxAdapter(
+        child: new Visibility(
+          child: new Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+            child: new Center(
+              child: new Text("sdfsdf"),
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }

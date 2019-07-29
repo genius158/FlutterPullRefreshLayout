@@ -1,6 +1,6 @@
 # flutter_pullrefreshlayout
 
-## PullRefreshLayout flutter 版本(保持Android、ios特性)
+## PullRefreshLayout flutter 版本(保持Android、ios特性),目前已适配 所有使用Scrollable实现滑动的组件,也就是说flutter的所有滚动组件都支持
 
 
 ### how to use 
