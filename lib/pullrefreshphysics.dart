@@ -9,9 +9,7 @@ class PullRefreshPhysics extends ScrollPhysics {
   PhysicsStatus _status;
   bool _scrollAble = true;
 
-  set scrollAble(bool scrollAble) {
-    _scrollAble = scrollAble;
-  }
+  set scrollAble(bool scrollAble) => _scrollAble = scrollAble;
 
   bool status(PhysicsStatus status) {
     if (status == null) {
