@@ -155,20 +155,37 @@ class _PullRefreshRender extends RenderBox
         ContainerRenderObjectMixin<RenderBox, _RefreshParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _RefreshParentData>,
         RefreshControl {
-  Overflow _overflow = Overflow.clip;
+  /// 滚动事件分发
   Stream<Object> _streamHandle;
 
+  ///是否剪切
+  Overflow _overflow = Overflow.clip;
+
+  /// scrollable 的element
   Element _scrollElement;
 
+  /// 当前刷新状态
   RefreshStatus _refreshStatus = RefreshStatus.normal;
-  bool _isRefreshStatus = false;
-  bool _isLoadingStatus = false;
-  bool _isMoving = false;
 
+  /// 处在刷新过程中
+  bool _isRefreshProcess = false;
+
+  /// 处在加载过程中
+  bool _isLoadingProcess = false;
+
+  /// 是否是由触摸引起的滑动
+  bool _isTouchMoving = false;
+
+  /// 总共的滑动距离
   double _hScroll = 0;
+
+  /// 当前滑动偏移量
   double _offset = 0;
 
+  /// 头部渲染器
   _WidgetRender _headerRender;
+
+  /// 底部渲染器
   _WidgetRender _footerRender;
 
   OnInitializeCallback _onInitialize;
@@ -183,13 +200,16 @@ class _PullRefreshRender extends RenderBox
     if (value is ScrollUpdateNotification) {
       _hScroll += _offset = value.scrollDelta;
       if (!isScrollNormal) {
-        _onMove();
+        _onMoving();
       }
       _headerRender?.translate(_hScroll);
-      _footerRender?.translate(_hScroll);
+
+      double offset = _hScroll - maxScrollExtent ?? _hScroll;
+      offset = offset > 0 ? offset : 0;
+      _footerRender?.translate(offset);
     }
     if (value is OverscrollNotification) {
-      if (_isMoving) {
+      if (_isTouchMoving) {
         physics?.status(PhysicsStatus.bouncing);
       }
     } else if (value is UserScrollNotification) {
@@ -199,18 +219,26 @@ class _PullRefreshRender extends RenderBox
     }
   }
 
+  /// 判断是否还有touch事件
+  int _touchFlag = 0;
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
+      _touchFlag++;
       if (!isScrollNormal) {
         physics?.status(PhysicsStatus.bouncing);
       } else {
         physics?.status(PhysicsStatus.normal);
       }
     } else if (event is PointerMoveEvent) {
-      _isMoving = true;
+      _isTouchMoving = true;
     } else if (event is PointerCancelEvent || event is PointerUpEvent) {
-      _isMoving = false;
+      _touchFlag--;
+      if (_touchFlag > 0) {
+        return;
+      }
+      _isTouchMoving = false;
       if (isScrollNormal) {
         physics?.scrollAble = true;
         physics?.status(PhysicsStatus.normal);
@@ -220,27 +248,32 @@ class _PullRefreshRender extends RenderBox
     }
   }
 
-  void _onMove() {
-    if (_isRefreshStatus) {
-      if (_offset >= 0) {
-        physics?.scrollAble = false;
-        physics?.status(PhysicsStatus.normal);
+  void _onMoving() {
+    if (_onPullChange != null) {
+      double present = 0;
+      if (hasHeader && isOverTop) {
+        present = (_hScroll - minScrollExtent) / headerHeight;
+        _onPullChange(this, present);
+      } else if (hasFooter && isOverBottom) {
+        present = (_hScroll - maxScrollExtent) / footerHeight;
+        _onPullChange(this, present);
       }
-      return;
-    } else if (_isLoadingStatus) {
-      if (_offset <= 0) {
-        physics?.scrollAble = false;
-        physics?.status(PhysicsStatus.normal);
-      }
+    }
+//    if (_isRefreshProcess && _offset >= 0 ||
+//        _isLoadingProcess && _offset <= 0) {
+//      physics?.scrollAble = false;
+//      physics?.status(PhysicsStatus.normal);
+//    }
+    if (_isRefreshProcess || _isLoadingProcess) {
       return;
     }
 
-    if (isOverTop) {
-      if (isUnBelowHeader) {
+    triggerLogic(bool type, bool holdTriggerGo) {
+      if (type) {
         if (_refreshStatus != RefreshStatus.holdTrigger &&
             _onPullHoldTrigger != null &&
             // 只有在触摸的情况下，才走恢复到触发的逻辑逻辑
-            (_offset < 0 && _isMoving)) {
+            (holdTriggerGo && _isTouchMoving)) {
           _refreshStatus = RefreshStatus.holdTrigger;
           _onPullHoldTrigger(this);
         }
@@ -249,7 +282,13 @@ class _PullRefreshRender extends RenderBox
         _refreshStatus = RefreshStatus.holdUnTrigger;
         _onPullHoldUnTrigger(this);
       }
-    } else if (isOverBottom) {}
+    }
+
+    if (isOverTop) {
+      triggerLogic(isUnBelowRefreshExtend, _offset < 0);
+    } else if (isOverBottom) {
+      triggerLogic(isUnBelowLoadingExtend, _offset > 0);
+    }
   }
 
   void _tryReset() {
@@ -257,8 +296,8 @@ class _PullRefreshRender extends RenderBox
       physics?.status(PhysicsStatus.normal);
       physics?.scrollAble = true;
       _refreshStatus = RefreshStatus.normal;
-      _isRefreshStatus = false;
-      _isLoadingStatus = false;
+      _isRefreshProcess = false;
+      _isLoadingProcess = false;
       if (_onPullReset != null) {
         _onPullReset(this);
       }
@@ -266,18 +305,14 @@ class _PullRefreshRender extends RenderBox
   }
 
   void goRefresh() {
-    physics.scrollAble = false;
+    physics?.scrollAble = false;
 
-    double to = 0;
-    if (isOverTop) {
-      to = minScrollExtent;
-      if (-refreshHeight + minScrollExtent > _hScroll) {
-        to = -refreshHeight + minScrollExtent;
-      }
-    } else if (isOverBottom) {
-      to = maxScrollExtent;
-      if (footerHeight + maxScrollExtent < _hScroll) {
-        to = maxScrollExtent + footerHeight;
+    double to = _hScroll;
+    if (!isScrollNormal) {
+      if (isOverTop) {
+        to = isUnBelowRefreshExtend ? refreshScrollExtent : minScrollExtent;
+      } else if (isOverBottom) {
+        to = isUnBelowLoadingExtend ? loadingScrollExtent : maxScrollExtent;
       }
     }
 
@@ -289,12 +324,12 @@ class _PullRefreshRender extends RenderBox
       to = isOverTop ? minScrollExtent : maxScrollExtent;
     } else {
       if (_refreshStatus == RefreshStatus.holding) {
-        if (isOverTop && _isRefreshStatus) {
-          if (_hScroll > -refreshHeight + minScrollExtent) {
+        if (isOverTop && _isRefreshProcess) {
+          if (!isUnBelowRefreshExtend) {
             return;
           }
-        } else if (isOverBottom && _isLoadingStatus) {
-          if (_hScroll < footerHeight + maxScrollExtent) {
+        } else if (isOverBottom && _isLoadingProcess) {
+          if (!isUnBelowLoadingExtend) {
             return;
           }
         }
@@ -304,7 +339,6 @@ class _PullRefreshRender extends RenderBox
     if (isScrollNormal) {
       _onRefreshLogic();
     } else {
-      print("scrollerscrollerscrollerscrollerscroller  " + to.toString());
       scroller
           ?.animateTo(to,
               duration: Duration(milliseconds: 400), curve: Curves.ease)
@@ -319,44 +353,31 @@ class _PullRefreshRender extends RenderBox
       _tryReset();
       return;
     }
-    if (_isRefreshStatus || _isLoadingStatus) {
+    if (_isRefreshProcess || _isLoadingProcess) {
       return;
     }
-    if (isUnBelowHeader) {
-      if (_headerRender != null) {
-        _isRefreshStatus = true;
-        if (_onPullHolding != null) {
-          _onPullHolding(this);
-        }
-      }
-    } else if (isUnBelowFooter && _footerRender != null) {
-      _isLoadingStatus = true;
+    bool isTrigger = false;
+    if (isUnBelowRefreshExtend) {
+      isTrigger = _isRefreshProcess = true;
+    } else if (isUnBelowLoadingExtend) {
+      isTrigger = _isLoadingProcess = true;
+    }
+    if (isTrigger) {
+      _refreshStatus = RefreshStatus.holding;
       if (_onPullHolding != null) {
         _onPullHolding(this);
       }
     }
   }
 
-  bool get isOverTop => _hScroll < minScrollExtent ?? _hScroll;
-
-  bool get isUnBelowHeader =>
-      _hScroll <=
-      (_headerRender != null ? -_headerRender?.size?.height : _hScroll - 1);
-
-  bool get isUnBelowFooter =>
-      _hScroll >=
-      (_footerRender != null ? -_footerRender?.size?.height : _hScroll + 1);
-
-  bool get isOverBottom => _hScroll > maxScrollExtent ?? _hScroll;
-
   @override
   bool isRefresh() {
-    return _isRefreshStatus;
+    return _isRefreshProcess;
   }
 
   @override
   bool isLoadMore() {
-    return _isLoadingStatus;
+    return _isLoadingProcess;
   }
 
   @override
@@ -388,11 +409,31 @@ class _PullRefreshRender extends RenderBox
 
   set onPullReset(onPullReset) => _onPullReset = onPullReset;
 
+  bool get isOverTop => _hScroll < minScrollExtent ?? _hScroll;
+
+  bool get isOverBottom => _hScroll > maxScrollExtent ?? _hScroll;
+
+  bool get hasHeader => _headerRender != null;
+
+  bool get hasFooter => _footerRender != null;
+
+  double get refreshScrollExtent => -headerHeight + minScrollExtent ?? _hScroll;
+
+  double get loadingScrollExtent => footerHeight + maxScrollExtent ?? _hScroll;
+
+  /// 当前位置是否可以触发下拉刷新
+  bool get isUnBelowRefreshExtend =>
+      hasHeader ? _hScroll <= refreshScrollExtent : false;
+
+  /// 当前位置是否可以触发上拉加载
+  bool get isUnBelowLoadingExtend =>
+      hasFooter ? _hScroll >= loadingScrollExtent : false;
+
   double get minScrollExtent => scroller?.position?.minScrollExtent;
 
   double get maxScrollExtent => scroller?.position?.maxScrollExtent;
 
-  double get refreshHeight {
+  double get headerHeight {
     if (_headerRender != null) {
       return _headerRender.size.height;
     }
@@ -406,6 +447,7 @@ class _PullRefreshRender extends RenderBox
     return 0;
   }
 
+  /// 是否处在正常滚动范围（不出在isOverTop、isOverBottom状态）
   bool get isScrollNormal =>
       (minScrollExtent ?? _hScroll) <= _hScroll &&
       _hScroll <= (maxScrollExtent ?? _hScroll);
@@ -584,6 +626,9 @@ class _WidgetRender extends RenderProxyBox {
   double _scroll;
 
   void translate(double scroll) {
+    if (_scroll == scroll) {
+      return;
+    }
     _scroll = scroll;
     markNeedsPaint();
   }

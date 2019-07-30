@@ -86,6 +86,10 @@ class PullRefreshPhysics extends ScrollPhysics {
 
   @override
   String toString() {
-    return super.toString() + "  ScrollPhysics:" + _scrollPhysics.toString();
+    return super.toString() +
+        "  " +
+        _scrollAble.toString() +
+        "  ScrollPhysics:" +
+        _scrollPhysics.toString();
   }
 }

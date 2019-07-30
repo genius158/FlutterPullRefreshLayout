@@ -68,8 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  PullRefreshPhysics _refreshLayoutPhysics =
-      new PullRefreshPhysics();
+  PullRefreshPhysics _refreshLayoutPhysics = new PullRefreshPhysics();
   String _text = "正常";
 
   @override
@@ -98,6 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.lightBlue,
           height: 300,
           child: PullRefreshLayout(
+            onPullChange: (_, value) {
+              print(
+                  "onPullChangeonPullChangeonPullChange  " + value.toString());
+            },
             onPullFinish: (_) {
               print(
                   "onPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinish");
@@ -125,16 +128,16 @@ class _MyHomePageState extends State<MyHomePage> {
             },
             onPullHolding: (control) {
               setState(() {
-                _text = "正在刷新";
+                _text = control.isRefresh() ? "正在刷新" : "正在加载";
               });
-              Future.delayed(Duration(seconds: 2)).then((_) {
+              Future.delayed(Duration(seconds: 3)).then((_) {
                 control.finishRefresh();
                 setState(() {
-                  _text = "刷新完成";
+                  _text = control.isRefresh() ? "刷新完成" : "加载完成";
                 });
               });
             },
-            header: Text(
+            footer: Text(
               _text,
               style: TextStyle(fontSize: 40),
             ),
