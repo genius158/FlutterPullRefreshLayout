@@ -68,10 +68,10 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  PullRefreshPhysics _refreshLayoutPhysics = new PullRefreshPhysics();
+  PullRefreshPhysics _refreshLayoutPhysics =
+      new PullRefreshPhysics(parent: BouncingScrollPhysics());
   String _text = "正常";
   int size = 0;
-  bool firstShowFlag = true;
 
   @override
   Widget build(BuildContext context) {
@@ -86,10 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // in the middle of the parent.
         child: PullRefreshLayout(
           onInitialize: (control) {
-            if (firstShowFlag) {
-              firstShowFlag = false;
-              control.autoRefresh();
-            }
+            control.autoRefresh();
           },
           onPullChange: (_, value) {},
           onPullFinish: (_) {},
@@ -127,10 +124,23 @@ class _MyHomePageState extends State<MyHomePage> {
           header: Container(
             color: Colors.red,
             width: double.infinity,
-            height: 50,
+            height: 70,
             child: Center(
               child: Text(
                 _text,
+                style: TextStyle(
+                  fontSize: 30,
+                ),
+              ),
+            ),
+          ),
+          footer: Container(
+            color: Colors.red,
+            width: double.infinity,
+            height: 70,
+            child: Center(
+              child: Text(
+                "test",
                 style: TextStyle(
                   fontSize: 30,
                 ),
@@ -417,34 +427,6 @@ class _MyHomePageState extends State<MyHomePage> {
           style: new TextStyle(fontSize: 16),
         )),
       )),
-      SliverGrid(
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 200.0,
-          mainAxisSpacing: 10.0,
-          crossAxisSpacing: 10.0,
-          childAspectRatio: 4.0,
-        ),
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            return Container(
-              alignment: Alignment.center,
-              color: Colors.teal[100 * (index % 9)],
-              child: Text('SliverGrid item2 $index'),
-            );
-          },
-          childCount: 20,
-        ),
-      ),
-      new SliverToBoxAdapter(
-        child: new Visibility(
-          child: new Container(
-            padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-            child: new Center(
-              child: new Text("sdfsdf"),
-            ),
-          ),
-        ),
-      ),
     ];
     for (int i = 0; i < size; i++) {
       slivers.add(new SliverToBoxAdapter(

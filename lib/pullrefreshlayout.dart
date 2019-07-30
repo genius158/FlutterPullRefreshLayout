@@ -55,12 +55,8 @@ class _PullRefreshState extends State<PullRefreshLayout> {
   Widget build(BuildContext context) {
     List<Widget> widgets = new List();
     widgets.add(widget.child);
-    if (widget.header != null) {
-      widgets.add(_Header(widget.header));
-    }
-    if (widget.footer != null) {
-      widgets.add(_Footer(widget.footer));
-    }
+    if (widget.header != null) widgets.add(_Header(widget.header));
+    if (widget.footer != null) widgets.add(_Footer(widget.footer));
 
     if (_handleScroll == null || _handleScroll.hasListener) {
       _handleScroll?.close();
@@ -199,10 +195,9 @@ class _PullRefreshRender extends RenderBox
 
   void handleNotification(Notification value) {
     if (value is ScrollUpdateNotification) {
-      _hScroll += _offset = value.scrollDelta;
-      if (!isScrollNormal) {
-        _onMoving();
-      }
+      _offset = value.scrollDelta;
+      if (!isScrollNormal) _onMoving();
+      _hScroll = value.metrics.pixels;
       _headerRender?.translate(_hScroll);
 
       double offset = _hScroll - maxScrollExtent ?? _hScroll;
@@ -229,57 +224,72 @@ class _PullRefreshRender extends RenderBox
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    _isOverRefreshBackTryHolding = false;
+    _isOverLoadingBackTryHolding = false;
+
     if (event is PointerDownEvent) {
       _touchFlag++;
-      if (isScrollNormal) {
-        physics?.status(PhysicsStatus.normal);
-      }
+      if (isScrollNormal) physics?.status(PhysicsStatus.normal);
     } else if (event is PointerMoveEvent) {
       _isTouchMoving = true;
     } else if (event is PointerCancelEvent || event is PointerUpEvent) {
       _touchFlag--;
-      if (_touchFlag > 0) {
-        return;
-      }
+      if (_touchFlag > 0) return;
       _isTouchMoving = false;
       if (isScrollNormal) {
         physics?.scrollAble = true;
         physics?.status(PhysicsStatus.normal);
       } else {
-        goRefresh();
+        _tryHolding();
       }
     }
   }
 
+  bool _isOverRefreshBackTryHolding = false;
+  bool _isOverLoadingBackTryHolding = false;
+
   void _onMoving() {
     if (_onPullChange != null) {
-      double present = 0;
       if (hasHeader && isOverTop) {
-        present = (_hScroll - minScrollExtent) / headerHeight;
-        _onPullChange(this, present);
+        _onPullChange(this, (_hScroll - minScrollExtent) / headerHeight);
       } else if (hasFooter && isOverBottom) {
-        present = (_hScroll - maxScrollExtent) / footerHeight;
-        _onPullChange(this, present);
+        _onPullChange(this, (_hScroll - maxScrollExtent) / footerHeight);
       }
     }
 
-    if (_isRefreshProcess || _isLoadingProcess) {
+    bool holding = _refreshStatus == RefreshStatus.holding;
+    if (_isRefreshProcess && holding && isOverTop && _offset > 0) {
+      if (!_isTouchMoving) {
+        if (!_isOverRefreshBackTryHolding) {
+          _isOverRefreshBackTryHolding = true;
+          _tryHolding();
+        }
+      }
       return;
     }
+    if (_isLoadingProcess && holding && isOverBottom && _offset < 0) {
+      if (!_isTouchMoving) {
+        if (!_isOverLoadingBackTryHolding) {
+          _isOverLoadingBackTryHolding = true;
+          _tryHolding();
+        }
+        return;
+      }
+    }
+
+    if (_isRefreshProcess || _isLoadingProcess) return;
 
     triggerLogic(bool type, bool holdTriggerGo) {
       if (type) {
         if (_refreshStatus != RefreshStatus.holdTrigger &&
-            _onPullHoldTrigger != null &&
             // 只有在触摸的情况下，才走恢复到触发的逻辑逻辑
             (holdTriggerGo && _isTouchMoving)) {
           _refreshStatus = RefreshStatus.holdTrigger;
-          _onPullHoldTrigger(this);
+          if (_onPullHoldTrigger != null) _onPullHoldTrigger(this);
         }
-      } else if (_refreshStatus != RefreshStatus.holdUnTrigger &&
-          _onPullHoldUnTrigger != null) {
+      } else if (_refreshStatus != RefreshStatus.holdUnTrigger) {
         _refreshStatus = RefreshStatus.holdUnTrigger;
-        _onPullHoldUnTrigger(this);
+        if (_onPullHoldUnTrigger != null) _onPullHoldUnTrigger(this);
       }
     }
 
@@ -292,23 +302,22 @@ class _PullRefreshRender extends RenderBox
 
   void _tryReset() {
     if (_refreshStatus == RefreshStatus.reset) {
+      _refreshStatus = RefreshStatus.normal;
+
       physics?.status(PhysicsStatus.normal);
       physics?.scrollAble = true;
-      _refreshStatus = RefreshStatus.normal;
+
       _isRefreshProcess = false;
       _isLoadingProcess = false;
-      if (_onPullReset != null) {
-        _onPullReset(this);
-      }
+      if (_onPullReset != null) _onPullReset(this);
 
       _footerRender?.translate(_hScroll);
       _headerRender?.translate(_hScroll);
     }
   }
 
-  void goRefresh() {
+  void _tryHolding() {
     physics?.scrollAble = false;
-
     double to = _hScroll;
     if (!isScrollNormal) {
       if (isOverTop) {
@@ -324,41 +333,33 @@ class _PullRefreshRender extends RenderBox
         return;
       }
       to = isOverTop ? minScrollExtent : maxScrollExtent;
-    } else {
-      if (_refreshStatus == RefreshStatus.holding) {
-        if (isOverTop && _isRefreshProcess) {
-          if (!isUnBelowRefreshExtend) {
-            return;
-          }
-        } else if (isOverBottom && _isLoadingProcess) {
-          if (!isUnBelowLoadingExtend) {
-            return;
-          }
-        }
+    } else if (_refreshStatus == RefreshStatus.holding) {
+      if (isOverTop && _isRefreshProcess) {
+        if (!isUnBelowRefreshExtend) to = _hScroll;
+      } else if (isOverBottom && _isLoadingProcess) {
+        if (!isUnBelowLoadingExtend) to = _hScroll;
       }
     }
-
     if (isScrollNormal) {
-      _onRefreshLogic();
+      _holdingLogic();
     } else {
       scroller
           ?.animateTo(to,
               duration: Duration(milliseconds: animationDuring),
               curve: Curves.ease)
           ?.whenComplete(() {
-        _onRefreshLogic();
+        _holdingLogic();
       });
     }
   }
 
-  void _onRefreshLogic() {
+  void _holdingLogic() {
     if (isScrollNormal) {
       _tryReset();
       return;
     }
-    if (_isRefreshProcess || _isLoadingProcess) {
-      return;
-    }
+    if (_isRefreshProcess || _isLoadingProcess) return;
+
     bool isTrigger = false;
     if (isUnBelowRefreshExtend) {
       isTrigger = _isRefreshProcess = true;
@@ -374,20 +375,15 @@ class _PullRefreshRender extends RenderBox
   }
 
   @override
-  bool isRefresh() {
-    return _isRefreshProcess;
-  }
+  bool isRefresh() => _isRefreshProcess;
 
   @override
-  bool isLoadMore() {
-    return _isLoadingProcess;
-  }
+  bool isLoadMore() => _isLoadingProcess;
 
   @override
   void autoRefresh({int delay: 300}) {
-    if (!hasHeader) {
-      return;
-    }
+    if (!hasHeader) return;
+
     auto() {
       physics?.scrollAble = false;
       physics?.status(PhysicsStatus.bouncing);
@@ -396,7 +392,7 @@ class _PullRefreshRender extends RenderBox
               duration: Duration(milliseconds: animationDuring),
               curve: Curves.ease)
           ?.whenComplete(() {
-        _onRefreshLogic();
+        _holdingLogic();
       });
     }
 
@@ -413,10 +409,8 @@ class _PullRefreshRender extends RenderBox
   void finish({int delay: 300}) {
     finish() {
       _refreshStatus = RefreshStatus.reset;
-      if (_onPullFinish != null) {
-        _onPullFinish(this);
-      }
-      goRefresh();
+      if (_onPullFinish != null) _onPullFinish(this);
+      _tryHolding();
     }
 
     if (delay == 0) {
@@ -472,23 +466,17 @@ class _PullRefreshRender extends RenderBox
   int animationDuring = 400;
 
   double get headerHeight {
-    if (_headerRender != null) {
-      return _headerRender.size.height;
-    }
+    if (_headerRender != null) return _headerRender.size.height;
     return 0;
   }
 
   double get footerHeight {
-    if (_footerRender != null) {
-      return _footerRender.size.height;
-    }
+    if (_footerRender != null) return _footerRender.size.height;
     return 0;
   }
 
   /// 是否处在正常滚动范围（不出在isOverTop、isOverBottom状态）
-  bool get isScrollNormal =>
-      (minScrollExtent ?? _hScroll) <= _hScroll &&
-      _hScroll <= (maxScrollExtent ?? _hScroll);
+  bool get isScrollNormal => !(scroller?.position?.outOfRange ?? true);
 
   PullRefreshPhysics get physics {
     if (_scrollElement != null && _scrollElement.widget is Scrollable) {
@@ -504,23 +492,18 @@ class _PullRefreshRender extends RenderBox
     return null;
   }
 
-  set scrollableElement(Element scrollElement) {
-    _scrollElement = scrollElement;
-  }
+  set scrollableElement(Element scrollElement) =>
+      _scrollElement = scrollElement;
 
   set overFlow(Overflow overFlow) {
-    if (overFlow != null) {
-      _overflow = overFlow;
-    }
+    if (overFlow != null) _overflow = overFlow;
   }
 
   set streamHandle(Stream<Object> streamHandle) {
     if (streamHandle != null) {
       _streamHandle = streamHandle;
       _streamHandle.listen((value) {
-        if (value is Notification) {
-          handleNotification(value);
-        }
+        if (value is Notification) handleNotification(value);
       });
     }
   }
@@ -565,11 +548,12 @@ class _PullRefreshRender extends RenderBox
     }
   }
 
+  bool _isInitialize = false;
+
   @override
   void performLayout() {
-    if (childCount == 0) {
-      return;
-    }
+    if (childCount == 0) return;
+
     _headerRender = null;
     _footerRender = null;
 
@@ -601,7 +585,8 @@ class _PullRefreshRender extends RenderBox
         )
         .biggest;
 
-    if (_onInitialize != null) {
+    if (_onInitialize != null && !_isInitialize) {
+      _isInitialize = true;
       _onInitialize(this);
     }
   }
@@ -666,18 +651,16 @@ class _WidgetRender extends RenderProxyBox {
   double _scroll;
 
   void translate(double scroll) {
-    if (_scroll == scroll) {
-      return;
-    }
+    if (_scroll == scroll) return;
+
     _scroll = scroll;
     markNeedsPaint();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_scroll != null) {
-      offset = offset.translate(0, -_scroll);
-    }
+    if (_scroll != null) offset = offset.translate(0, -_scroll);
+
     super.paint(context, offset);
   }
 }

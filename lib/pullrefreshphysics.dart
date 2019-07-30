@@ -40,9 +40,7 @@ class PullRefreshPhysics extends ScrollPhysics {
   }
 
   @override
-  ScrollPhysics get parent {
-    return _parent;
-  }
+  ScrollPhysics get parent => _parent;
 
   @override
   PullRefreshPhysics applyTo(ScrollPhysics ancestor) {
