@@ -13,9 +13,9 @@ enum RefreshStatus { normal, holding, holdTrigger, holdUnTrigger, reset }
 enum PhysicsStatus { normal, bouncing }
 
 abstract class RefreshControl {
-  void finishRefresh();
+  void finish({int delay: 300});
 
-  void autoRefresh();
+  void autoRefresh({int delay: 300});
 
   bool isRefresh();
 

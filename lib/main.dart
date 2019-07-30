@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   PullRefreshPhysics _refreshLayoutPhysics = new PullRefreshPhysics();
   String _text = "正常";
+  int size = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -93,56 +94,58 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Container(
-          color: Colors.lightBlue,
-          height: 300,
-          child: PullRefreshLayout(
-            onPullChange: (_, value) {
-              print(
-                  "onPullChangeonPullChangeonPullChange  " + value.toString());
-            },
-            onPullFinish: (_) {
-              print(
-                  "onPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinish");
-            },
-            onPullReset: (_) {
-              print(
-                  "onPullResetonPullResetonPullResetonPullResetonPullResetonPullResetonPullReset");
+        child: PullRefreshLayout(
+          onPullChange: (_, value) {
+            print(
+                "onPullChangeonPullChangeonPullChange  " + value.toString());
+          },
+          onPullFinish: (_) {
+            print(
+                "onPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinish");
+          },
+          onPullReset: (_) {
+            print(
+                "onPullResetonPullResetonPullResetonPullResetonPullResetonPullResetonPullReset");
+            setState(() {
+              _text = "正常";
+            });
+          },
+          onPullHoldUnTrigger: (_) {
+            print(
+                "onPullHoldUnTriggeronPullHoldUnTriggeronPullHoldUnTrigger");
+            setState(() {
+              _text = "不触发";
+            });
+          },
+          onPullHoldTrigger: (_) {
+            print(
+                "onPullHoldTriggeronPullHoldTriggeronPullHoldTriggeronPullHoldTrigger");
+            setState(() {
+              _text = "触发";
+            });
+          },
+          onPullHolding: (control) {
+            setState(() {
+              _text = control.isRefresh() ? "正在刷新" : "正在加载";
+            });
+            Future.delayed(Duration(seconds: 3)).then((_) {
               setState(() {
-                _text = "正常";
+                _text = control.isRefresh() ? "刷新完成" : "加载完成";
+                size += 10;
               });
-            },
-            onPullHoldUnTrigger: (_) {
-              print(
-                  "onPullHoldUnTriggeronPullHoldUnTriggeronPullHoldUnTrigger");
-              setState(() {
-                _text = "不触发";
-              });
-            },
-            onPullHoldTrigger: (_) {
-              print(
-                  "onPullHoldTriggeronPullHoldTriggeronPullHoldTriggeronPullHoldTrigger");
-              setState(() {
-                _text = "触发";
-              });
-            },
-            onPullHolding: (control) {
-              setState(() {
-                _text = control.isRefresh() ? "正在刷新" : "正在加载";
-              });
-              Future.delayed(Duration(seconds: 3)).then((_) {
-                control.finishRefresh();
-                setState(() {
-                  _text = control.isRefresh() ? "刷新完成" : "加载完成";
-                });
-              });
-            },
-            footer: Text(
+              control.finish();
+            });
+          },
+          footer: Container(
+            color:  Colors.red,
+            width: double.infinity,
+            height: 50,
+            child:Center(child:  Text(
               _text,
-              style: TextStyle(fontSize: 40),
-            ),
-            child: getScrollTest(),
-          ),
+              style: TextStyle(
+                fontSize: 30,),
+            ),),),
+          child: getScrollTest(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -351,7 +354,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   getScrollTest() {
-    return CustomScrollView(physics: _refreshLayoutPhysics, slivers: <Widget>[
+    List<Widget> slivers = [
       new SliverToBoxAdapter(
         child: new Container(
           padding: EdgeInsets.only(top: 10, bottom: 10),
@@ -449,6 +452,19 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-    ]);
+    ];
+    for (int i = 0; i < size; i++) {
+      slivers.add(new SliverToBoxAdapter(
+        child: new Visibility(
+          child: new Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+            child: new Center(
+              child: new Text("sdfsdf"),
+            ),
+          ),
+        ),
+      ));
+    }
+    return CustomScrollView(physics: _refreshLayoutPhysics, slivers: slivers);
   }
 }

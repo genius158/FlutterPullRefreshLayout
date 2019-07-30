@@ -54,13 +54,14 @@ class _PullRefreshState extends State<PullRefreshLayout> {
   @override
   Widget build(BuildContext context) {
     List<Widget> widgets = new List();
+    widgets.add(widget.child);
     if (widget.header != null) {
       widgets.add(_Header(widget.header));
     }
     if (widget.footer != null) {
       widgets.add(_Footer(widget.footer));
     }
-    widgets.add(widget.child);
+
     if (_handleScroll == null || _handleScroll.hasListener) {
       _handleScroll?.close();
       _handleScroll = new StreamController();
@@ -301,6 +302,9 @@ class _PullRefreshRender extends RenderBox
       if (_onPullReset != null) {
         _onPullReset(this);
       }
+
+      _footerRender?.translate(_hScroll);
+      _headerRender?.translate(_hScroll);
     }
   }
 
@@ -341,7 +345,8 @@ class _PullRefreshRender extends RenderBox
     } else {
       scroller
           ?.animateTo(to,
-              duration: Duration(milliseconds: 400), curve: Curves.ease)
+              duration: Duration(milliseconds: animationDuring),
+              curve: Curves.ease)
           ?.whenComplete(() {
         _onRefreshLogic();
       });
@@ -381,15 +386,28 @@ class _PullRefreshRender extends RenderBox
   }
 
   @override
-  void autoRefresh() {}
+  void autoRefresh({int delay: 300}) {
+    scroller?.animateTo(refreshScrollExtent,
+        duration: Duration(milliseconds: animationDuring), curve: Curves.ease);
+  }
 
   @override
-  void finishRefresh() {
-    _refreshStatus = RefreshStatus.reset;
-    if (_onPullFinish != null) {
-      _onPullFinish(this);
+  void finish({int delay: 300}) {
+    finish() {
+      _refreshStatus = RefreshStatus.reset;
+      if (_onPullFinish != null) {
+        _onPullFinish(this);
+      }
+      goRefresh();
     }
-    goRefresh();
+
+    if (delay == 0) {
+      finish();
+    } else {
+      Future.delayed(Duration(milliseconds: delay)).then((_) {
+        finish();
+      });
+    }
   }
 
 ///////////////////////////////////分割线///////////////////////////////////////////
@@ -432,6 +450,8 @@ class _PullRefreshRender extends RenderBox
   double get minScrollExtent => scroller?.position?.minScrollExtent;
 
   double get maxScrollExtent => scroller?.position?.maxScrollExtent;
+
+  int animationDuring = 400;
 
   double get headerHeight {
     if (_headerRender != null) {
@@ -532,6 +552,8 @@ class _PullRefreshRender extends RenderBox
     if (childCount == 0) {
       return;
     }
+    _headerRender = null;
+    _footerRender = null;
 
     var child = firstChild;
     double layoutHeight = 0;
