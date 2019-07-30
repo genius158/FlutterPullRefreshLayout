@@ -71,20 +71,10 @@ class _MyHomePageState extends State<MyHomePage> {
   PullRefreshPhysics _refreshLayoutPhysics = new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
+  bool firstShowFlag = true;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-//    Future.delayed(Duration(seconds: 6)).then((_) {
-//      print("updateRenderObject 111111    ");
-//      setState(() {});
-//    });
-
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -95,31 +85,25 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: PullRefreshLayout(
-          onPullChange: (_, value) {
-            print(
-                "onPullChangeonPullChangeonPullChange  " + value.toString());
+          onInitialize: (control) {
+            if (firstShowFlag) {
+              firstShowFlag = false;
+              control.autoRefresh();
+            }
           },
-          onPullFinish: (_) {
-            print(
-                "onPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinishonPullFinish");
-          },
+          onPullChange: (_, value) {},
+          onPullFinish: (_) {},
           onPullReset: (_) {
-            print(
-                "onPullResetonPullResetonPullResetonPullResetonPullResetonPullResetonPullReset");
             setState(() {
               _text = "正常";
             });
           },
           onPullHoldUnTrigger: (_) {
-            print(
-                "onPullHoldUnTriggeronPullHoldUnTriggeronPullHoldUnTrigger");
             setState(() {
               _text = "不触发";
             });
           },
           onPullHoldTrigger: (_) {
-            print(
-                "onPullHoldTriggeronPullHoldTriggeronPullHoldTriggeronPullHoldTrigger");
             setState(() {
               _text = "触发";
             });
@@ -130,21 +114,29 @@ class _MyHomePageState extends State<MyHomePage> {
             });
             Future.delayed(Duration(seconds: 3)).then((_) {
               setState(() {
-                _text = control.isRefresh() ? "刷新完成" : "加载完成";
-                size += 10;
+                if (control.isLoadMore()) {
+                  _text = "加载完成";
+                  size += 10;
+                } else {
+                  _text = "刷新完成";
+                }
               });
               control.finish();
             });
           },
-          footer: Container(
-            color:  Colors.red,
+          header: Container(
+            color: Colors.red,
             width: double.infinity,
             height: 50,
-            child:Center(child:  Text(
-              _text,
-              style: TextStyle(
-                fontSize: 30,),
-            ),),),
+            child: Center(
+              child: Text(
+                _text,
+                style: TextStyle(
+                  fontSize: 30,
+                ),
+              ),
+            ),
+          ),
           child: getScrollTest(),
         ),
       ),
@@ -357,6 +349,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Widget> slivers = [
       new SliverToBoxAdapter(
         child: new Container(
+          color: Colors.lightBlue,
           padding: EdgeInsets.only(top: 10, bottom: 10),
           child: new Column(
             children: <Widget>[

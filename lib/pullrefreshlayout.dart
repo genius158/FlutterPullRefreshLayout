@@ -210,8 +210,12 @@ class _PullRefreshRender extends RenderBox
       _footerRender?.translate(offset);
     }
     if (value is OverscrollNotification) {
+      OverscrollNotification over = value;
       if (_isTouchMoving) {
-        physics?.status(PhysicsStatus.bouncing);
+        if (hasHeader && over.overscroll < 0 ||
+            hasFooter && over.overscroll > 0) {
+          physics?.status(PhysicsStatus.bouncing);
+        }
       }
     } else if (value is UserScrollNotification) {
       if (value.direction == ScrollDirection.idle && isScrollNormal) {
@@ -227,9 +231,7 @@ class _PullRefreshRender extends RenderBox
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
       _touchFlag++;
-      if (!isScrollNormal) {
-        physics?.status(PhysicsStatus.bouncing);
-      } else {
+      if (isScrollNormal) {
         physics?.status(PhysicsStatus.normal);
       }
     } else if (event is PointerMoveEvent) {
@@ -260,11 +262,7 @@ class _PullRefreshRender extends RenderBox
         _onPullChange(this, present);
       }
     }
-//    if (_isRefreshProcess && _offset >= 0 ||
-//        _isLoadingProcess && _offset <= 0) {
-//      physics?.scrollAble = false;
-//      physics?.status(PhysicsStatus.normal);
-//    }
+
     if (_isRefreshProcess || _isLoadingProcess) {
       return;
     }
@@ -387,8 +385,28 @@ class _PullRefreshRender extends RenderBox
 
   @override
   void autoRefresh({int delay: 300}) {
-    scroller?.animateTo(refreshScrollExtent,
-        duration: Duration(milliseconds: animationDuring), curve: Curves.ease);
+    if (!hasHeader) {
+      return;
+    }
+    auto() {
+      physics?.scrollAble = false;
+      physics?.status(PhysicsStatus.bouncing);
+      scroller
+          ?.animateTo(refreshScrollExtent,
+              duration: Duration(milliseconds: animationDuring),
+              curve: Curves.ease)
+          ?.whenComplete(() {
+        _onRefreshLogic();
+      });
+    }
+
+    if (delay == 0) {
+      auto();
+    } else {
+      Future.delayed(Duration(milliseconds: delay)).then((_) {
+        auto();
+      });
+    }
   }
 
   @override
