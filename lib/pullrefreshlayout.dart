@@ -193,22 +193,32 @@ class _PullRefreshRender extends RenderBox
   OnPullFinishCallback _onPullFinish;
   OnPullResetCallback _onPullReset;
 
+  void _headerTranslate() => _headerRender?.translate(_hScroll);
+
+  void _footerTranslate() {
+    double offset = _hScroll - maxScrollExtent ?? _hScroll;
+    offset = offset > 0 ? offset : 0;
+    _footerRender?.translate(offset);
+  }
+
   void handleNotification(Notification value) {
+    if (value is ScrollNotification) {
+      if (value.metrics.axis == Axis.horizontal) {
+        return;
+      }
+    }
     if (value is ScrollUpdateNotification) {
       _offset = value.scrollDelta;
       if (!isScrollNormal) _onMoving();
       _hScroll = value.metrics.pixels;
-      _headerRender?.translate(_hScroll);
-
-      double offset = _hScroll - maxScrollExtent ?? _hScroll;
-      offset = offset > 0 ? offset : 0;
-      _footerRender?.translate(offset);
+      _headerTranslate();
+      _footerTranslate();
     }
     if (value is OverscrollNotification) {
       OverscrollNotification over = value;
       if (_isTouchMoving) {
-        if (hasHeader && over.overscroll < 0 ||
-            hasFooter && over.overscroll > 0) {
+        if (!_isLoadingProcess && hasHeader && over.overscroll < 0 ||
+            !_isRefreshProcess && hasFooter && over.overscroll > 0) {
           physics?.status(PhysicsStatus.bouncing);
         }
       }
@@ -240,7 +250,7 @@ class _PullRefreshRender extends RenderBox
         physics?.scrollAble = true;
         physics?.status(PhysicsStatus.normal);
       } else {
-        _tryHolding();
+        _animate2Status();
       }
     }
   }
@@ -249,6 +259,8 @@ class _PullRefreshRender extends RenderBox
   bool _isOverLoadingBackTryHolding = false;
 
   void _onMoving() {
+    if (isScrollNormal) physics?.status(PhysicsStatus.normal);
+
     if (_onPullChange != null) {
       if (hasHeader && isOverTop) {
         _onPullChange(this, (_hScroll - minScrollExtent) / headerHeight);
@@ -262,7 +274,7 @@ class _PullRefreshRender extends RenderBox
       if (!_isTouchMoving) {
         if (!_isOverRefreshBackTryHolding) {
           _isOverRefreshBackTryHolding = true;
-          _tryHolding();
+          _animate2Status();
         }
       }
       return;
@@ -271,7 +283,7 @@ class _PullRefreshRender extends RenderBox
       if (!_isTouchMoving) {
         if (!_isOverLoadingBackTryHolding) {
           _isOverLoadingBackTryHolding = true;
-          _tryHolding();
+          _animate2Status();
         }
         return;
       }
@@ -304,26 +316,30 @@ class _PullRefreshRender extends RenderBox
     if (_refreshStatus == RefreshStatus.reset) {
       _refreshStatus = RefreshStatus.normal;
 
-      physics?.status(PhysicsStatus.normal);
       physics?.scrollAble = true;
+      physics?.status(PhysicsStatus.normal);
 
       _isRefreshProcess = false;
       _isLoadingProcess = false;
       if (_onPullReset != null) _onPullReset(this);
 
-      _footerRender?.translate(_hScroll);
-      _headerRender?.translate(_hScroll);
+      _headerTranslate();
+      _footerTranslate();
     }
   }
 
-  void _tryHolding() {
+  void _animate2Status() {
     physics?.scrollAble = false;
     double to = _hScroll;
     if (!isScrollNormal) {
       if (isOverTop) {
-        to = isUnBelowRefreshExtend ? refreshScrollExtent : minScrollExtent;
+        to = minScrollExtent;
+        if (!_isLoadingProcess && isUnBelowRefreshExtend)
+          to = refreshScrollExtent;
       } else if (isOverBottom) {
-        to = isUnBelowLoadingExtend ? loadingScrollExtent : maxScrollExtent;
+        to = maxScrollExtent;
+        if (!_isRefreshProcess && isUnBelowLoadingExtend)
+          to = loadingScrollExtent;
       }
     }
 
@@ -341,19 +357,23 @@ class _PullRefreshRender extends RenderBox
       }
     }
     if (isScrollNormal) {
-      _holdingLogic();
+      _tryHoldingOrReset();
     } else {
-      scroller
-          ?.animateTo(to,
-              duration: Duration(milliseconds: animationDuring),
-              curve: Curves.ease)
-          ?.whenComplete(() {
-        _holdingLogic();
-      });
+      if (to == _hScroll) {
+        scroller?.jumpTo(to);
+      } else {
+        scroller
+            ?.animateTo(to,
+                duration: Duration(milliseconds: animationDuring),
+                curve: Curves.ease)
+            ?.whenComplete(() {
+          _tryHoldingOrReset();
+        });
+      }
     }
   }
 
-  void _holdingLogic() {
+  void _tryHoldingOrReset() {
     if (isScrollNormal) {
       _tryReset();
       return;
@@ -392,7 +412,7 @@ class _PullRefreshRender extends RenderBox
               duration: Duration(milliseconds: animationDuring),
               curve: Curves.ease)
           ?.whenComplete(() {
-        _holdingLogic();
+        _tryHoldingOrReset();
       });
     }
 
@@ -410,7 +430,7 @@ class _PullRefreshRender extends RenderBox
     finish() {
       _refreshStatus = RefreshStatus.reset;
       if (_onPullFinish != null) _onPullFinish(this);
-      _tryHolding();
+      _animate2Status();
     }
 
     if (delay == 0) {
@@ -480,7 +500,9 @@ class _PullRefreshRender extends RenderBox
 
   PullRefreshPhysics get physics {
     if (_scrollElement != null && _scrollElement.widget is Scrollable) {
-      return (_scrollElement.widget as Scrollable).physics;
+      if ((_scrollElement.widget as Scrollable).physics is PullRefreshPhysics) {
+        return (_scrollElement.widget as Scrollable).physics;
+      }
     }
     return null;
   }

@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   PullRefreshPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
+//      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
 
@@ -109,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               _text = control.isRefresh() ? "正在刷新" : "正在加载";
             });
-            Future.delayed(Duration(seconds: 3)).then((_) {
+            Future.delayed(Duration(seconds: 4)).then((_) {
               setState(() {
                 if (control.isLoadMore()) {
                   _text = "加载完成";
