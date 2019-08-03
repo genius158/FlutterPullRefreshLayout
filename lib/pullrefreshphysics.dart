@@ -62,13 +62,15 @@ class PullRefreshPhysics extends ScrollPhysics {
   }
 
   @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) =>
-      _scrollPhysics.applyBoundaryConditions(position, value);
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    position = position.copyWith(viewportDimension: 100);
+    return _scrollPhysics.applyBoundaryConditions(position, value);
+  }
 
   @override
   Simulation createBallisticSimulation(
       ScrollMetrics position, double velocity) {
-    if(!_scrollAble){
+    if (!_scrollAble) {
       return null;
     }
     if (_refreshChannel == null) {
@@ -111,7 +113,7 @@ class PullRefreshPhysics extends ScrollPhysics {
   @override
   String toString() {
     return "RefreshPysics " +
-        _scrollPhysics.toString() +
+        _scrollPhysics.toString() +"   "+
         _scrollAble.toString();
   }
 }

@@ -317,8 +317,8 @@ class _PullRefreshRender extends RenderBox
           _onPullHolding(this);
         }
       }
-      _animate2Status();
     }
+    _animate2Status();
   }
 
   void endTouchLogic(PointerEvent event) {
@@ -353,14 +353,18 @@ class _PullRefreshRender extends RenderBox
   }
 
   void _onMoving() {
+    void autoLoading() {
+      if (_enableAutoLoading && _offset > 0) {
+        bool toHolding = _hScroll + _offset >= maxScrollExtent;
+        if (toHolding) _tryHolding(toHolding: toHolding);
+      }
+    }
     if (isScrollNormal) {
       if (_onPullChange != null) _onPullChange(this, 0);
+      autoLoading();
       return;
     }
-    if (_enableAutoLoading) {
-      bool toHolding = isOverBottom;
-      if (toHolding) _tryHolding(toHolding: toHolding);
-    }
+    autoLoading();
     if (_onPullChange != null) {
       if (hasHeader && isOverTop) {
         _onPullChange(this, (_hScroll - minScrollExtent) / refreshHeight);
@@ -370,7 +374,7 @@ class _PullRefreshRender extends RenderBox
     }
     if (_isToRefreshHolding || _isToLoadingHolding) return;
 
-    triggerLogic(bool type, bool holdTriggerGo) {
+    callback(bool type, bool holdTriggerGo) {
       if (type) {
         if (_refreshStatus != RefreshStatus.holdTrigger &&
             // 只有在触摸的情况下，才走恢复到触发的逻辑逻辑
@@ -385,9 +389,9 @@ class _PullRefreshRender extends RenderBox
     }
 
     if (isOverTop) {
-      triggerLogic(isUnBelowRefreshExtend, _offset < 0);
+      callback(isUnBelowRefreshExtend, _offset < 0);
     } else if (isOverBottom) {
-      triggerLogic(isUnBelowLoadingExtend, _offset > 0);
+      callback(isUnBelowLoadingExtend, _offset > 0);
     }
   }
 
@@ -446,7 +450,12 @@ class _PullRefreshRender extends RenderBox
         }
       }
 
+      print(
+          "physics?.scrollAblescrollAblescrollAblescrollAblescrollAblescrollAble1111  " +
+              physics.toString());
+
       if (enableAutoLoading && !_isToRefreshHolding) {
+        physics.status(PhysicsStatus.bouncing);
         holdFlag();
         return;
       }
@@ -488,6 +497,7 @@ class _PullRefreshRender extends RenderBox
     _isToRefreshHolding = true;
     auto() {
       physics?.scrollAble = false;
+      physics?.status(PhysicsStatus.bouncing);
       scroller
           ?.animateTo(refreshScrollExtent,
               duration: Duration(milliseconds: animationDuring),
@@ -714,8 +724,9 @@ class _PullRefreshRender extends RenderBox
   }
 
   void _statusMoveEndNormal() {
-    if (_hScroll > maxScrollExtent / 2 && _offset > 0 ||
-        _hScroll < maxScrollExtent / 2 && _offset < 0) {
+    double scrollCenter = maxScrollExtent / 2;
+    if (_hScroll > scrollCenter && _hScroll < maxScrollExtent && _offset > 0 ||
+        _hScroll < scrollCenter && _hScroll > minScrollExtent && _offset < 0) {
       physics?.status(PhysicsStatus.normal);
     }
   }

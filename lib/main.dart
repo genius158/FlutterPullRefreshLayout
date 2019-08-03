@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'pullrefresharound.dart';
 import 'pullrefreshlayout.dart';
 import 'pullrefreshphysics.dart';
 
@@ -70,23 +71,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ScrollPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
+//      new PullRefreshPhysics();
 
 //      BouncingScrollPhysics();
-//      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
 
+  RefreshControl _refreshControl;
+
   @override
   Widget build(BuildContext context) {
+//    _refreshControl?.autoRefresh(delay: 5000);
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: InnerText(widget.title),
       ),
       body: PullRefreshLayout(
         onInitialize: (control) {
-          control.autoRefresh();
+          _refreshControl = control;
+          _refreshControl?.autoRefresh();
         },
         enableAutoLoading: true,
         onPullChange: (control, value) {
@@ -154,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
           width: double.infinity,
           height: 70,
           child: Center(
-            child: Text(
+            child: InnerText(
               _text,
               style: TextStyle(
                 fontSize: 30,
@@ -168,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
           width: double.infinity,
           height: 100,
           child: Center(
-            child: Text(
+            child: InnerText(
               "test",
               style: TextStyle(
                 fontSize: 30,
@@ -190,192 +196,192 @@ class _MyHomePageState extends State<MyHomePage> {
     return ListView(
       physics: _refreshLayoutPhysics,
       children: <Widget>[
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
-        Text(
+        InnerText(
           'You have pushed the button this many times:',
         ),
-        Text(
+        InnerText(
           '$_counter',
           style: Theme.of(context).textTheme.display1,
         ),
@@ -392,7 +398,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: new Column(
             children: <Widget>[
               new SizedBox(
-                  child: new Text(
+                  child: new InnerText(
                 'SliverGrid',
                 style: new TextStyle(fontSize: 16),
               )),
@@ -416,7 +422,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Container(
               alignment: Alignment.center,
               color: Colors.teal[100 * (index % 9)],
-              child: Text('SliverGrid item $index'),
+              child: InnerText('SliverGrid item $index'),
             );
           },
           childCount: 10,
@@ -427,7 +433,7 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.only(top: 10, bottom: 10),
         color: Colors.green,
         child: new SizedBox(
-            child: new Text(
+            child: new InnerText(
           'SliverFixedExtentList',
           style: new TextStyle(fontSize: 16),
         )),
@@ -439,7 +445,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Container(
               alignment: Alignment.center,
               color: Colors.lightBlue[100 * (index % 9)],
-              child: Text('SliverFixedExtentList item $index'),
+              child: InnerText('SliverFixedExtentList item $index'),
             );
           },
           childCount: 20,
@@ -450,7 +456,7 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.only(top: 10, bottom: 10),
         color: Colors.green,
         child: new SizedBox(
-            child: new Text(
+            child: new InnerText(
           'SliverGrid',
           style: new TextStyle(fontSize: 16),
         )),
@@ -462,7 +468,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: new Container(
             padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
             child: new Center(
-              child: new Text("sdfsdf"),
+              child: new InnerText("sdfsdf"),
             ),
           ),
         ),
@@ -480,7 +486,7 @@ class _MyHomePageState extends State<MyHomePage> {
           pinned: true,
           expandedHeight: 250.0,
           flexibleSpace: FlexibleSpaceBar(
-            title: Text('Demo'),
+            title: InnerText('Demo'),
           ),
         ),
         SliverGrid(
@@ -495,7 +501,7 @@ class _MyHomePageState extends State<MyHomePage> {
               return Container(
                 alignment: Alignment.center,
                 color: Colors.teal[100 * (index % 9)],
-                child: Text('grid item $index'),
+                child: InnerText('grid item $index'),
               );
             },
             childCount: 20,
@@ -508,12 +514,30 @@ class _MyHomePageState extends State<MyHomePage> {
               return Container(
                 alignment: Alignment.center,
                 color: Colors.lightBlue[100 * (index % 9)],
-                child: Text('list item $index'),
+                child: InnerText('list item $index'),
               );
             },
           ),
         ),
       ],
+    );
+  }
+}
+
+class InnerText extends Text {
+  const InnerText(String data, {TextStyle style}) : super(data, style: style);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: super.build(context),
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return Text("" + this.toString());
+            });
+      },
     );
   }
 }
