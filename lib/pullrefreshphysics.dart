@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import 'pullrefresharound.dart';
 
@@ -8,8 +9,15 @@ class PullRefreshPhysics extends ScrollPhysics {
   ScrollPhysics _parent;
   PhysicsStatus _status;
   bool _scrollAble = true;
+  RefreshData _refreshChannel;
 
   set scrollAble(bool scrollAble) => _scrollAble = scrollAble;
+
+  void attachRefreshData(RefreshData refreshData) {
+    if (refreshData != _refreshChannel) {
+      this._refreshChannel = refreshData;
+    }
+  }
 
   bool status(PhysicsStatus status) {
     if (status == null) {
@@ -59,10 +67,20 @@ class PullRefreshPhysics extends ScrollPhysics {
 
   @override
   Simulation createBallisticSimulation(
-          ScrollMetrics position, double velocity) =>
-      _scrollAble
-          ? _scrollPhysics.createBallisticSimulation(position, velocity)
-          : null;
+      ScrollMetrics position, double velocity) {
+    if (_refreshChannel == null) {
+      return _scrollPhysics.createBallisticSimulation(position, velocity);
+    }
+    if (_refreshChannel.refreshStatus == RefreshStatus.reset) {
+    } else if (_refreshChannel.isToRefreshHolding) {
+      position = position.copyWith(
+          minScrollExtent: _refreshChannel.refreshScrollExtent);
+    } else if (_refreshChannel.isToLoadingHolding) {
+      position = position.copyWith(
+          maxScrollExtent: _refreshChannel.loadingScrollExtent);
+    }
+    return _scrollPhysics.createBallisticSimulation(position, velocity);
+  }
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) =>
@@ -84,10 +102,11 @@ class PullRefreshPhysics extends ScrollPhysics {
 
   @override
   String toString() {
-    return super.toString() +
-        "  " +
-        _scrollAble.toString() +
-        "  ScrollPhysics:" +
-        _scrollPhysics.toString();
+    return "RefreshPysics " +
+        _scrollPhysics.toString() +
+        _scrollAble.toString();
   }
+
+  AlwaysScrollableScrollPhysics scrollSimulation =
+      new AlwaysScrollableScrollPhysics();
 }

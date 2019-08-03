@@ -10,6 +10,18 @@ typedef OnPullResetCallback = void Function(RefreshControl control);
 
 enum RefreshStatus { normal, holding, holdTrigger, holdUnTrigger, reset }
 
+abstract class RefreshData {
+  double get refreshScrollExtent => null;
+
+  double get loadingScrollExtent => null;
+
+  bool get isToRefreshHolding => false;
+
+  bool get isToLoadingHolding => false;
+
+  RefreshStatus get refreshStatus => null;
+}
+
 enum PhysicsStatus { normal, bouncing }
 
 abstract class RefreshControl {
@@ -17,7 +29,7 @@ abstract class RefreshControl {
 
   void autoRefresh({int delay: 300});
 
-  bool isRefresh();
+  bool isRefreshProcess();
 
-  bool isLoadMore();
+  bool isLoadingProcess();
 }

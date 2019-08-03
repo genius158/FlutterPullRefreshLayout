@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pullrefreshlayout/pullrefreshlayout.dart';
 
+import 'pullrefreshlayout.dart';
 import 'pullrefreshphysics.dart';
 
 //void main() => Future.delayed(Duration(seconds: 5)).then((_) {
@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   PullRefreshPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
+
 //      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
@@ -82,74 +83,89 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: PullRefreshLayout(
-          onInitialize: (control) {
-            control.autoRefresh();
-          },
-          onPullChange: (_, value) {},
-          onPullFinish: (_) {},
-          onPullReset: (_) {
-            setState(() {
+      body: PullRefreshLayout(
+        onInitialize: (control) {
+          control.autoRefresh();
+        },
+        onPullChange: (control, value) {
+          if (control.isRefreshProcess()) {
+            print("PullRefreshLayout onPullChange11 " + value.toString());
+          }
+          print("PullRefreshLayout onPullChange22 " + value.toString());
+
+        },
+        onPullFinish: (control) {
+          if (control.isRefreshProcess()) {
+            print("PullRefreshLayout onPullFinish ");
+          }
+        },
+        onPullReset: (control) {
+          setState(() {
+            if (control.isRefreshProcess()) {
               _text = "正常";
-            });
-          },
-          onPullHoldUnTrigger: (_) {
-            setState(() {
+              print("PullRefreshLayout onPullReset ");
+            }
+          });
+        },
+        onPullHoldUnTrigger: (control) {
+          setState(() {
+            if (control.isRefreshProcess()) {
               _text = "不触发";
-            });
-          },
-          onPullHoldTrigger: (_) {
-            setState(() {
+            }
+          });
+        },
+        onPullHoldTrigger: (control) {
+          setState(() {
+            if (control.isRefreshProcess()) {
               _text = "触发";
-            });
-          },
-          onPullHolding: (control) {
+            }
+          });
+        },
+        onPullHolding: (control) {
+          setState(() {
+            if (control.isRefreshProcess()) {
+              _text = "正在刷新";
+            } else if (control.isLoadingProcess()) {
+            }
+          });
+          Future.delayed(Duration(seconds: 4)).then((_) {
             setState(() {
-              _text = control.isRefresh() ? "正在刷新" : "正在加载";
+              if (control.isLoadingProcess()) {
+                size += 10;
+              } else if (control.isRefreshProcess()) {
+                _text = "刷新完成";
+              }
             });
-            Future.delayed(Duration(seconds: 4)).then((_) {
-              setState(() {
-                if (control.isLoadMore()) {
-                  _text = "加载完成";
-                  size += 10;
-                } else {
-                  _text = "刷新完成";
-                }
-              });
-              control.finish();
-            });
-          },
-          header: Container(
-            color: Colors.red,
-            width: double.infinity,
-            height: 70,
-            child: Center(
-              child: Text(
-                _text,
-                style: TextStyle(
-                  fontSize: 30,
-                ),
+            control.finish();
+          });
+        },
+        header: Container(
+          color: Colors.red,
+          width: double.infinity,
+          height: 70,
+          child: Center(
+            child: Text(
+              _text,
+              style: TextStyle(
+                fontSize: 30,
               ),
             ),
           ),
-          footer: Container(
-            color: Colors.red,
-            width: double.infinity,
-            height: 70,
-            child: Center(
-              child: Text(
-                "test",
-                style: TextStyle(
-                  fontSize: 30,
-                ),
-              ),
-            ),
-          ),
-          child: getScrollTest(),
         ),
+        footer: Container(
+          color: Colors.red,
+          width: double.infinity,
+          height: 70,
+          child: Center(
+            child: Text(
+              "test",
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+          ),
+        ),
+        child: getScrollTest(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -442,5 +458,51 @@ class _MyHomePageState extends State<MyHomePage> {
       ));
     }
     return CustomScrollView(physics: _refreshLayoutPhysics, slivers: slivers);
+  }
+
+  Widget getNestTest() {
+    ScrollController s;
+    return CustomScrollView(
+      physics: _refreshLayoutPhysics,
+      slivers: <Widget>[
+        const SliverAppBar(
+          pinned: true,
+          expandedHeight: 250.0,
+          flexibleSpace: FlexibleSpaceBar(
+            title: Text('Demo'),
+          ),
+        ),
+        SliverGrid(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 200.0,
+            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 10.0,
+            childAspectRatio: 4.0,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              return Container(
+                alignment: Alignment.center,
+                color: Colors.teal[100 * (index % 9)],
+                child: Text('grid item $index'),
+              );
+            },
+            childCount: 20,
+          ),
+        ),
+        SliverFixedExtentList(
+          itemExtent: 50.0,
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              return Container(
+                alignment: Alignment.center,
+                color: Colors.lightBlue[100 * (index % 9)],
+                child: Text('list item $index'),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
