@@ -359,6 +359,7 @@ class _PullRefreshRender extends RenderBox
         if (toHolding) _tryHolding(toHolding: toHolding);
       }
     }
+
     if (isScrollNormal) {
       if (_onPullChange != null) _onPullChange(this, 0);
       autoLoading();
@@ -449,10 +450,6 @@ class _PullRefreshRender extends RenderBox
           _isLoadingProcess = true;
         }
       }
-
-      print(
-          "physics?.scrollAblescrollAblescrollAblescrollAblescrollAblescrollAble1111  " +
-              physics.toString());
 
       if (enableAutoLoading && !_isToRefreshHolding) {
         physics.status(PhysicsStatus.bouncing);
