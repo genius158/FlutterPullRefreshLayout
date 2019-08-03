@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ScrollPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
+
 //      BouncingScrollPhysics();
 //      new PullRefreshPhysics();
   String _text = "正常";
@@ -91,15 +92,15 @@ class _MyHomePageState extends State<MyHomePage> {
         onPullChange: (control, value) {
           if (control.isRefreshProcess()) {
 //            print("PullRefreshLayout isRefreshProcess onPullChange11 " + value.toString());
-          }else if(control.isLoadingProcess()){
+          } else if (control.isLoadingProcess()) {
 //            print("PullRefreshLayout isLoadingProcess onPullChange " + value.toString());
           }
         },
         onPullFinish: (control) {
           if (control.isRefreshProcess()) {
             print("PullRefreshLayout isRefreshProcess onPullFinish ");
-          }else if(control.isLoadingProcess()){
-            print("PullRefreshLayout isLoadingProcess onPullFinish " );
+          } else if (control.isLoadingProcess()) {
+            print("PullRefreshLayout isLoadingProcess onPullFinish ");
           }
         },
         onPullReset: (control) {
@@ -107,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (control.isRefreshProcess()) {
               _text = "正常";
               print("PullRefreshLayout isRefreshProcess onPullReset ");
-            }else if(control.isLoadingProcess()){
+            } else if (control.isLoadingProcess()) {
               print("PullRefreshLayout isLoadingProcess onPullReset");
             }
           });
@@ -130,12 +131,14 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             if (control.isRefreshProcess()) {
               _text = "正在刷新";
-              print("PullRefreshLayout isRefreshProcess onPullHolding  loading");
+              print(
+                  "PullRefreshLayout isRefreshProcess onPullHolding  loading");
             } else if (control.isLoadingProcess()) {
-              print("PullRefreshLayout isLoadingProcess onPullHolding  loading");
+              print(
+                  "PullRefreshLayout isLoadingProcess onPullHolding  loading");
             }
           });
-          Future.delayed(Duration(seconds: 4)).then((_) {
+          Future.delayed(Duration(seconds: 1)).then((_) {
             setState(() {
               if (control.isLoadingProcess()) {
                 size += 10;

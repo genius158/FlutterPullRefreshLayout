@@ -57,9 +57,6 @@ class _PullRefreshState extends State<PullRefreshLayout> {
     if (_handleScroll != null && !_handleScroll.isClosed) _handleScroll.close();
   }
 
-  Map<Type, GestureRecognizerFactory> _gestureRecognizers =
-      const <Type, GestureRecognizerFactory>{};
-
   @override
   Widget build(BuildContext context) {
     List<Widget> widgets = new List();
@@ -72,24 +69,6 @@ class _PullRefreshState extends State<PullRefreshLayout> {
       _handleScroll = new StreamController();
     }
 
-    Widget child = RawGestureDetector(
-      gestures: _gestureRecognizers,
-      child: _PullRefreshWidget(
-        widgets,
-        _handleScroll.stream,
-        widget.refreshHeight,
-        widget.loadingHeight,
-        widget.enableAutoLoading,
-        widget.onInitialize,
-        widget.onPullChange,
-        widget.onPullHoldTrigger,
-        widget.onPullHoldUnTrigger,
-        widget.onPullHolding,
-        widget.onPullFinish,
-        widget.onPullReset,
-      ),
-    );
-
     return NotificationListener<ScrollNotification>(
       key: _key,
       onNotification: (value) {
@@ -101,7 +80,20 @@ class _PullRefreshState extends State<PullRefreshLayout> {
             _handleScroll.add(value);
           }
         },
-        child: child,
+        child: _PullRefreshWidget(
+          widgets,
+          _handleScroll.stream,
+          widget.refreshHeight,
+          widget.loadingHeight,
+          widget.enableAutoLoading,
+          widget.onInitialize,
+          widget.onPullChange,
+          widget.onPullHoldTrigger,
+          widget.onPullHoldUnTrigger,
+          widget.onPullHolding,
+          widget.onPullFinish,
+          widget.onPullReset,
+        ),
       ),
     );
   }
@@ -294,6 +286,7 @@ class _PullRefreshRender extends RenderBox
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     _velocityTrack(event);
     if (event is PointerDownEvent) {
+      physics?.scrollAble = true;
       _touchFlag++;
       if (isScrollNormal) physics?.status(PhysicsStatus.normal);
     } else if (event is PointerMoveEvent) {
@@ -415,7 +408,6 @@ class _PullRefreshRender extends RenderBox
   }
 
   void _animate2Status() {
-    physics?.scrollAble = false;
     double to = _hScroll;
     if (!isScrollNormal) {
       if (isOverTop) {
@@ -458,6 +450,7 @@ class _PullRefreshRender extends RenderBox
         holdFlag();
         return;
       }
+      physics?.scrollAble = false;
       scroller
           ?.animateTo(to,
               duration: Duration(milliseconds: animationDuring),
@@ -495,7 +488,6 @@ class _PullRefreshRender extends RenderBox
     _isToRefreshHolding = true;
     auto() {
       physics?.scrollAble = false;
-      physics?.status(PhysicsStatus.bouncing);
       scroller
           ?.animateTo(refreshScrollExtent,
               duration: Duration(milliseconds: animationDuring),

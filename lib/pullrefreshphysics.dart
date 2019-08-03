@@ -68,6 +68,9 @@ class PullRefreshPhysics extends ScrollPhysics {
   @override
   Simulation createBallisticSimulation(
       ScrollMetrics position, double velocity) {
+    if(!_scrollAble){
+      return null;
+    }
     if (_refreshChannel == null) {
       return _scrollPhysics.createBallisticSimulation(position, velocity);
     }
@@ -111,7 +114,4 @@ class PullRefreshPhysics extends ScrollPhysics {
         _scrollPhysics.toString() +
         _scrollAble.toString();
   }
-
-  AlwaysScrollableScrollPhysics scrollSimulation =
-      new AlwaysScrollableScrollPhysics();
 }
