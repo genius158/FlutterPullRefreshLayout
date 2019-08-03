@@ -13,6 +13,7 @@ class PullRefreshLayout extends StatefulWidget {
   final Widget footer;
   final double refreshHeight;
   final double loadingHeight;
+  final bool enableAutoLoading;
   final OnInitializeCallback onInitialize;
   final OnPullChangeCallback onPullChange;
   final OnPullHoldTriggerCallback onPullHoldTrigger;
@@ -28,6 +29,7 @@ class PullRefreshLayout extends StatefulWidget {
       this.footer,
       this.refreshHeight,
       this.loadingHeight,
+      this.enableAutoLoading: false,
       this.onInitialize,
       this.onPullChange,
       this.onPullHoldTrigger,
@@ -77,6 +79,7 @@ class _PullRefreshState extends State<PullRefreshLayout> {
         _handleScroll.stream,
         widget.refreshHeight,
         widget.loadingHeight,
+        widget.enableAutoLoading,
         widget.onInitialize,
         widget.onPullChange,
         widget.onPullHoldTrigger,
@@ -118,11 +121,14 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
   final double _refreshHeight;
   final double _loadingHeight;
 
+  final bool _enableAutoLoading;
+
   _PullRefreshWidget(
       List<Widget> children,
       this._handleScroll,
       this._refreshHeight,
       this._loadingHeight,
+      this._enableAutoLoading,
       this._onInitialize,
       this._onPullChange,
       this._onPullHoldTrigger,
@@ -143,6 +149,7 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
       _handleScroll,
       _refreshHeight,
       _loadingHeight,
+      _enableAutoLoading,
       _onInitialize,
       _onPullChange,
       _onPullHoldTrigger,
@@ -160,6 +167,7 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
       ..streamHandle = _handleScroll
       ..refreshHeight = _refreshHeight
       ..loadingHeight = _loadingHeight
+      .._enableAutoLoading = _enableAutoLoading
       ..onIniztialize = _onInitialize
       ..onPullChange = _onPullChange
       ..onPullHoldTrigger = _onPullHoldTrigger
@@ -217,6 +225,8 @@ class _PullRefreshRender extends RenderBox
   double _refreshHeight;
   double _loadingHeight;
 
+  bool _enableAutoLoading;
+
   OnInitializeCallback _onInitialize;
   OnPullChangeCallback _onPullChange;
   OnPullHoldTriggerCallback _onPullHoldTrigger;
@@ -256,7 +266,8 @@ class _PullRefreshRender extends RenderBox
         }
       }
     } else if (value is UserScrollNotification) {
-      if (value.direction == ScrollDirection.idle && isScrollNormal) {
+      if (value.direction == ScrollDirection.idle &&
+          (isScrollNormal || enableAutoLoading && !isOverTop)) {
         _tryReset();
       }
     }
@@ -300,11 +311,11 @@ class _PullRefreshRender extends RenderBox
     }
   }
 
-  void _tryHolding() {
+  void _tryHolding({bool toHolding}) {
     if (!_isRefreshProcess && !_isLoadingProcess) {
       if (isUnBelowRefreshExtend) {
         _isToRefreshHolding = true;
-      } else if (isUnBelowLoadingExtend) {
+      } else if (toHolding ?? isUnBelowLoadingExtend) {
         _isToLoadingHolding = true;
       }
       if (_isToRefreshHolding || _isToLoadingHolding) {
@@ -352,6 +363,10 @@ class _PullRefreshRender extends RenderBox
     if (isScrollNormal) {
       if (_onPullChange != null) _onPullChange(this, 0);
       return;
+    }
+    if (_enableAutoLoading) {
+      bool toHolding = isOverBottom;
+      if (toHolding) _tryHolding(toHolding: toHolding);
     }
     if (_onPullChange != null) {
       if (hasHeader && isOverTop) {
@@ -427,9 +442,22 @@ class _PullRefreshRender extends RenderBox
         if (!isUnBelowLoadingExtend) to = _hScroll;
       }
     }
+
     if (isScrollNormal) {
       _tryReset();
     } else {
+      void holdFlag() {
+        if (isToRefreshHolding) {
+          _isRefreshProcess = true;
+        } else if (isToLoadingHolding) {
+          _isLoadingProcess = true;
+        }
+      }
+
+      if (enableAutoLoading && !_isToRefreshHolding) {
+        holdFlag();
+        return;
+      }
       scroller
           ?.animateTo(to,
               duration: Duration(milliseconds: animationDuring),
@@ -441,11 +469,7 @@ class _PullRefreshRender extends RenderBox
           }
           return;
         }
-        if (isToRefreshHolding) {
-          _isRefreshProcess = true;
-        } else if (isToLoadingHolding) {
-          _isLoadingProcess = true;
-        }
+        holdFlag();
       });
     }
   }
@@ -566,6 +590,8 @@ class _PullRefreshRender extends RenderBox
   /// 是否处在正常滚动范围（不出在isOverTop、isOverBottom状态）
   bool get isScrollNormal => !(scroller?.position?.outOfRange ?? true);
 
+  bool get enableAutoLoading => _enableAutoLoading;
+
   @override
   RefreshStatus get refreshStatus => _refreshStatus;
 
@@ -610,6 +636,7 @@ class _PullRefreshRender extends RenderBox
       Stream<Object> handle,
       this._refreshHeight,
       this._loadingHeight,
+      this._enableAutoLoading,
       this._onInitialize,
       this._onPullChange,
       this._onPullHoldTrigger,

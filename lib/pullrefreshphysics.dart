@@ -71,6 +71,10 @@ class PullRefreshPhysics extends ScrollPhysics {
     if (_refreshChannel == null) {
       return _scrollPhysics.createBallisticSimulation(position, velocity);
     }
+    if (_refreshChannel.enableAutoLoading) {
+      position = position.copyWith(
+          maxScrollExtent: _refreshChannel.loadingScrollExtent);
+    }
     if (_refreshChannel.refreshStatus == RefreshStatus.reset) {
     } else if (_refreshChannel.isToRefreshHolding) {
       position = position.copyWith(
@@ -89,8 +93,9 @@ class PullRefreshPhysics extends ScrollPhysics {
   double carriedMomentum(double existingVelocity) =>
       _scrollPhysics.carriedMomentum(existingVelocity);
 
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) =>
-      _scrollPhysics.applyPhysicsToUserOffset(position, offset);
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return _scrollPhysics.applyPhysicsToUserOffset(position, offset);
+  }
 
   double get minFlingVelocity => _scrollPhysics.minFlingVelocity;
 

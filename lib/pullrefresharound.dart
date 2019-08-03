@@ -18,6 +18,7 @@ abstract class RefreshData {
   bool get isToRefreshHolding => false;
 
   bool get isToLoadingHolding => false;
+  bool get enableAutoLoading => false;
 
   RefreshStatus get refreshStatus => null;
 }

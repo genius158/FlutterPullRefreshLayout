@@ -68,9 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  PullRefreshPhysics _refreshLayoutPhysics =
+  ScrollPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
-
+//      BouncingScrollPhysics();
 //      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
@@ -87,23 +87,28 @@ class _MyHomePageState extends State<MyHomePage> {
         onInitialize: (control) {
           control.autoRefresh();
         },
+        enableAutoLoading: true,
         onPullChange: (control, value) {
           if (control.isRefreshProcess()) {
-            print("PullRefreshLayout onPullChange11 " + value.toString());
+//            print("PullRefreshLayout isRefreshProcess onPullChange11 " + value.toString());
+          }else if(control.isLoadingProcess()){
+//            print("PullRefreshLayout isLoadingProcess onPullChange " + value.toString());
           }
-          print("PullRefreshLayout onPullChange22 " + value.toString());
-
         },
         onPullFinish: (control) {
           if (control.isRefreshProcess()) {
-            print("PullRefreshLayout onPullFinish ");
+            print("PullRefreshLayout isRefreshProcess onPullFinish ");
+          }else if(control.isLoadingProcess()){
+            print("PullRefreshLayout isLoadingProcess onPullFinish " );
           }
         },
         onPullReset: (control) {
           setState(() {
             if (control.isRefreshProcess()) {
               _text = "正常";
-              print("PullRefreshLayout onPullReset ");
+              print("PullRefreshLayout isRefreshProcess onPullReset ");
+            }else if(control.isLoadingProcess()){
+              print("PullRefreshLayout isLoadingProcess onPullReset");
             }
           });
         },
@@ -125,7 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             if (control.isRefreshProcess()) {
               _text = "正在刷新";
+              print("PullRefreshLayout isRefreshProcess onPullHolding  loading");
             } else if (control.isLoadingProcess()) {
+              print("PullRefreshLayout isLoadingProcess onPullHolding  loading");
             }
           });
           Future.delayed(Duration(seconds: 4)).then((_) {
@@ -152,10 +159,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ),
+        loadingHeight: 70,
         footer: Container(
           color: Colors.red,
           width: double.infinity,
-          height: 70,
+          height: 100,
           child: Center(
             child: Text(
               "test",
