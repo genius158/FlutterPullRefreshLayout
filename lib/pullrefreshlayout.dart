@@ -250,6 +250,7 @@ class _PullRefreshRender extends RenderBox
   void _footerTranslate() {
     double offset = _hScroll - maxScrollExtent ?? _hScroll;
     offset = offset > 0 ? offset : 0;
+    offset = _refreshStatus == RefreshStatus.normal ? 0 : offset;
     _footerRender?.translate(offset);
   }
 
@@ -468,7 +469,7 @@ class _PullRefreshRender extends RenderBox
       return false;
     }
 
-    if (isScrollNormal) {
+    if (isScrollNormal || (!isOverTop && enableAutoLoading)) {
       if (!holdFlag()) {
         _tryReset();
       }
