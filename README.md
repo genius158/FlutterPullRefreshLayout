@@ -2,7 +2,7 @@
 
 ## PullRefreshLayout flutter 版本(保持Android、ios特性),目前已适配 所有使用Scrollable实现滑动的组件,也就是说flutter的所有滚动组件都支持
 
-#### dome [dome](https://github.com/genius158/FlutterPullRefreshLayout/blob/master/apkaround/app-release.apk)
+## dome [dome](https://raw.githubusercontent.com/genius158/FlutterPullRefreshLayout/master/apkaround/app-release.apk)
 
 ### how to use 
 ```
