@@ -70,7 +70,8 @@ class PullRefreshPhysics extends ScrollPhysics {
     if (_refreshChannel == null) {
       return _scrollPhysics.createBallisticSimulation(position, velocity);
     }
-    if (_refreshChannel.enableAutoLoading) {
+    if (_refreshChannel.enableAutoLoading &&
+        !_refreshChannel.isToRefreshHolding) {
       position = position.copyWith(
           maxScrollExtent: _refreshChannel.loadingScrollExtent);
     }

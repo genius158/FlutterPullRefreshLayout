@@ -70,10 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ScrollPhysics _refreshLayoutPhysics =
-//      new PullRefreshPhysics(parent: BouncingScrollPhysics());
-      new PullRefreshPhysics();
-
-//      BouncingScrollPhysics();
+      new PullRefreshPhysics(parent: BouncingScrollPhysics());
+//      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
 
@@ -144,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   "PullRefreshLayout isLoadingProcess onPullHolding  loading");
             }
           });
-          Future.delayed(Duration(seconds: 10)).then((_) {
+          Future.delayed(Duration(seconds: 1)).then((_) {
             setState(() {
               if (control.isLoadingProcess()) {
                 size += 10;
