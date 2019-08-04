@@ -62,12 +62,6 @@ class PullRefreshPhysics extends ScrollPhysics {
   }
 
   @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
-    position = position.copyWith(viewportDimension: 100);
-    return _scrollPhysics.applyBoundaryConditions(position, value);
-  }
-
-  @override
   Simulation createBallisticSimulation(
       ScrollMetrics position, double velocity) {
     if (!_scrollAble) {
@@ -92,11 +86,16 @@ class PullRefreshPhysics extends ScrollPhysics {
   }
 
   @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) =>
-      _scrollPhysics.shouldAcceptUserOffset(position);
+  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
 
-  double carriedMomentum(double existingVelocity) =>
-      _scrollPhysics.carriedMomentum(existingVelocity);
+  double carriedMomentum(double existingVelocity) {
+    return _scrollPhysics.carriedMomentum(existingVelocity);
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    return _scrollPhysics.applyBoundaryConditions(position, value);
+  }
 
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     return _scrollPhysics.applyPhysicsToUserOffset(position, offset);
@@ -113,7 +112,11 @@ class PullRefreshPhysics extends ScrollPhysics {
   @override
   String toString() {
     return "RefreshPysics " +
-        _scrollPhysics.toString() +"   "+
-        _scrollAble.toString();
+        "  scrollable: " +
+        _scrollAble.toString() +
+        "  curent: " +
+        _scrollPhysics.toString() +
+        "  parent: " +
+        _parent.toString();
   }
 }

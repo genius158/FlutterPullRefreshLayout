@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   "PullRefreshLayout isLoadingProcess onPullHolding  loading");
             }
           });
-          Future.delayed(Duration(seconds: 1)).then((_) {
+          Future.delayed(Duration(seconds: 10)).then((_) {
             setState(() {
               if (control.isLoadingProcess()) {
                 size += 10;
