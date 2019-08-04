@@ -18,6 +18,7 @@ abstract class RefreshData {
   bool get isToRefreshHolding => false;
 
   bool get isToLoadingHolding => false;
+
   bool get enableAutoLoading => false;
 
   RefreshStatus get refreshStatus => null;
@@ -33,4 +34,34 @@ abstract class RefreshControl {
   bool isRefreshProcess();
 
   bool isLoadingProcess();
+
+  RefreshStatus get refreshStatus => null;
+
+  void addOnInitializeCallback(
+          String callbackName, OnInitializeCallback onInitializeCall) =>
+      null;
+
+  void addOnPullChangeCallback(
+          String callbackName, OnPullChangeCallback onPullChangeCall) =>
+      null;
+
+  void addOnPullHoldTriggerCallback(String callbackName,
+          OnPullHoldTriggerCallback onPullHoldTriggerCall) =>
+      null;
+
+  void addOnPullHoldUnTriggerCallback(String callbackName,
+          OnPullHoldUnTriggerCallback onPullHoldUnTriggerCall) =>
+      null;
+
+  void addOnPullHoldingCallback(
+          String callbackName, OnPullHoldingCallback onPullHoldingCall) =>
+      null;
+
+  void addOnPullFinishCallback(
+          String callbackName, OnPullFinishCallback onPullFinishCall) =>
+      null;
+
+  void addOnPullResetCallback(
+          String callbackName, OnPullResetCallback onPullResetCall) =>
+      null;
 }

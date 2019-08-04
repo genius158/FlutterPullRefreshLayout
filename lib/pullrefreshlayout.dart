@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
 import 'pullrefresharound.dart';
@@ -22,22 +24,22 @@ class PullRefreshLayout extends StatefulWidget {
   final OnPullFinishCallback onPullFinish;
   final OnPullResetCallback onPullReset;
 
-  PullRefreshLayout(
-      {Key key,
-      @required this.child,
-      this.header,
-      this.footer,
-      this.refreshHeight,
-      this.loadingHeight,
-      this.enableAutoLoading: false,
-      this.onInitialize,
-      this.onPullChange,
-      this.onPullHoldTrigger,
-      this.onPullHoldUnTrigger,
-      this.onPullHolding,
-      this.onPullFinish,
-      this.onPullReset})
-      : assert(child != null),
+  PullRefreshLayout({
+    Key key,
+    @required this.child,
+    this.header,
+    this.footer,
+    this.refreshHeight,
+    this.loadingHeight,
+    this.enableAutoLoading: false,
+    this.onInitialize,
+    this.onPullChange,
+    this.onPullHoldTrigger,
+    this.onPullHoldUnTrigger,
+    this.onPullHolding,
+    this.onPullFinish,
+    this.onPullReset,
+  })  : assert(child != null),
         super(key: key);
 
   @override
@@ -60,7 +62,7 @@ class _PullRefreshState extends State<PullRefreshLayout> {
   @override
   Widget build(BuildContext context) {
     List<Widget> widgets = new List();
-    widgets.add(widget.child);
+    widgets.add(_Content(widget.child));
     if (widget.header != null) widgets.add(_Header(widget.header));
     if (widget.footer != null) widgets.add(_Footer(widget.footer));
 
@@ -99,6 +101,8 @@ class _PullRefreshState extends State<PullRefreshLayout> {
   }
 }
 
+ScrollController controllerGlobal;
+
 class _PullRefreshWidget extends MultiChildRenderObjectWidget {
   final Stream<Object> _handleScroll;
 
@@ -116,19 +120,19 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
   final bool _enableAutoLoading;
 
   _PullRefreshWidget(
-      List<Widget> children,
-      this._handleScroll,
-      this._refreshHeight,
-      this._loadingHeight,
-      this._enableAutoLoading,
-      this._onInitialize,
-      this._onPullChange,
-      this._onPullHoldTrigger,
-      this._onPullHoldUnTrigger,
-      this._onPullHolding,
-      this._onPullFinish,
-      this._onPullReset)
-      : super(children: children);
+    List<Widget> children,
+    this._handleScroll,
+    this._refreshHeight,
+    this._loadingHeight,
+    this._enableAutoLoading,
+    this._onInitialize,
+    this._onPullChange,
+    this._onPullHoldTrigger,
+    this._onPullHoldUnTrigger,
+    this._onPullHolding,
+    this._onPullFinish,
+    this._onPullReset,
+  ) : super(children: children);
 
   @override
   MultiChildRenderObjectElement createElement() {
@@ -137,6 +141,7 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
+    controllerGlobal = PrimaryScrollController.of(context);
     return new _PullRefreshRender(
       _handleScroll,
       _refreshHeight,
@@ -160,10 +165,10 @@ class _PullRefreshWidget extends MultiChildRenderObjectWidget {
       ..refreshHeight = _refreshHeight
       ..loadingHeight = _loadingHeight
       .._enableAutoLoading = _enableAutoLoading
-      ..onIniztialize = _onInitialize
+      ..onInitialize = _onInitialize
       ..onPullChange = _onPullChange
       ..onPullHoldTrigger = _onPullHoldTrigger
-      ..holdUnTrigger = _onPullHoldUnTrigger
+      ..onPullHoldUnTrigger = _onPullHoldUnTrigger
       ..onPullHolding = _onPullHolding
       ..onPullFinish = _onPullFinish
       ..onPullReset = _onPullReset;
@@ -176,6 +181,8 @@ class _PullRefreshRender extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _RefreshParentData>,
         RefreshControl,
         RefreshData {
+  static const String _TAG = "PRL_DEFAULT_TAG";
+
   /// 滚动事件分发
   Stream<Object> _streamHandle;
 
@@ -227,13 +234,16 @@ class _PullRefreshRender extends RenderBox
   /// 自动加载是否可用
   bool _enableAutoLoading;
 
-  OnInitializeCallback _onInitialize;
-  OnPullChangeCallback _onPullChange;
-  OnPullHoldTriggerCallback _onPullHoldTrigger;
-  OnPullHoldUnTriggerCallback _onPullHoldUnTrigger;
-  OnPullHoldingCallback _onPullHolding;
-  OnPullFinishCallback _onPullFinish;
-  OnPullResetCallback _onPullReset;
+  ScrollMetrics _scrollMetrics;
+
+  HashMap<String, OnInitializeCallback> _onInitializes = HashMap();
+  HashMap<String, OnPullChangeCallback> _onPullChanges = HashMap();
+  HashMap<String, OnPullHoldTriggerCallback> _onPullHoldTriggers = HashMap();
+  HashMap<String, OnPullHoldUnTriggerCallback> _onPullHoldUnTriggers =
+      HashMap();
+  HashMap<String, OnPullHoldingCallback> _onPullHoldings = HashMap();
+  HashMap<String, OnPullFinishCallback> _onPullFinishes = HashMap();
+  HashMap<String, OnPullResetCallback> _onPullResets = HashMap();
 
   void _headerTranslate() => _headerRender?.translate(_hScroll);
 
@@ -245,7 +255,8 @@ class _PullRefreshRender extends RenderBox
 
   void handleNotification(Notification value) {
     if (value is ScrollNotification) {
-      if (value.metrics.axis == Axis.horizontal) {
+      _scrollMetrics = value.metrics;
+      if (_scrollMetrics.axis == Axis.horizontal) {
         return;
       }
     }
@@ -253,7 +264,7 @@ class _PullRefreshRender extends RenderBox
       _offset = value.scrollDelta;
       _statusMoveEndNormal();
       _onMoving();
-      _hScroll = value.metrics.pixels;
+      _hScroll = _scrollMetrics.pixels;
       _headerTranslate();
       _footerTranslate();
     }
@@ -321,9 +332,7 @@ class _PullRefreshRender extends RenderBox
       }
       if (_isToRefreshHolding || _isToLoadingHolding) {
         _refreshStatus = RefreshStatus.holding;
-        if (_onPullHolding != null) {
-          _onPullHolding(this);
-        }
+        _onPullHolding();
       }
     }
     _animate2Status();
@@ -332,7 +341,6 @@ class _PullRefreshRender extends RenderBox
   void endTouchLogic(PointerEvent event) {
     final VelocityTracker tracker = _velocityTrackers[event.pointer];
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
-
     if (estimate != null && estimate.pixelsPerSecond != null) {
       final double minVelocity = physics?.minFlingVelocity ?? kMinFlingVelocity;
       final double minDistance = physics?.minFlingDistance ?? kTouchSlop;
@@ -341,7 +349,7 @@ class _PullRefreshRender extends RenderBox
       if (estimate != null && isFlingGesture) {
         Simulation bouncing = BouncingScrollSimulation(
           spring: physics?.spring,
-          position: scroller?.position?.pixels,
+          position: _scrollMetrics?.pixels,
           velocity: -estimate.pixelsPerSecond.dy * 0.91,
           leadingExtent: double.negativeInfinity,
           trailingExtent: double.infinity,
@@ -372,17 +380,15 @@ class _PullRefreshRender extends RenderBox
     }
 
     if (isScrollNormal) {
-      if (_onPullChange != null) _onPullChange(this, 0);
+      _onPullChange(0);
       autoLoading();
       return;
     }
     autoLoading();
-    if (_onPullChange != null) {
-      if (hasHeader && isOverTop) {
-        _onPullChange(this, (_hScroll - minScrollExtent) / refreshHeight);
-      } else if (hasFooter && isOverBottom) {
-        _onPullChange(this, (_hScroll - maxScrollExtent) / loadingHeight);
-      }
+    if (hasHeader && isOverTop) {
+      _onPullChange((_hScroll - minScrollExtent) / refreshHeight);
+    } else if (hasFooter && isOverBottom) {
+      _onPullChange((_hScroll - maxScrollExtent) / loadingHeight);
     }
     if (_isToRefreshHolding || _isToLoadingHolding) return;
 
@@ -392,11 +398,11 @@ class _PullRefreshRender extends RenderBox
             // 只有在触摸的情况下，才走恢复到触发的逻辑逻辑
             (holdTriggerGo && _isTouchMoving)) {
           _refreshStatus = RefreshStatus.holdTrigger;
-          if (_onPullHoldTrigger != null) _onPullHoldTrigger(this);
+          _onPullHoldTrigger();
         }
       } else if (_refreshStatus != RefreshStatus.holdUnTrigger) {
         _refreshStatus = RefreshStatus.holdUnTrigger;
-        if (_onPullHoldUnTrigger != null) _onPullHoldUnTrigger(this);
+        _onPullHoldUnTrigger();
       }
     }
 
@@ -409,7 +415,7 @@ class _PullRefreshRender extends RenderBox
 
   void _tryReset() {
     if (_refreshStatus == RefreshStatus.reset) {
-      if (_onPullReset != null) _onPullReset(this);
+      _onPullReset();
       _refreshStatus = RefreshStatus.normal;
       physics?.scrollAble = true;
       physics?.status(PhysicsStatus.normal);
@@ -454,9 +460,9 @@ class _PullRefreshRender extends RenderBox
       if (_isRefreshProcess || _isLoadingProcess) {
         return false;
       }
-      if (isToRefreshHolding) {
+      if (_isToRefreshHolding) {
         return _isRefreshProcess = true;
-      } else if (isToLoadingHolding) {
+      } else if (_isToLoadingHolding) {
         return _isLoadingProcess = true;
       }
       return false;
@@ -474,7 +480,7 @@ class _PullRefreshRender extends RenderBox
       scroller
           ?.animateTo(to,
               duration: Duration(milliseconds: animationDuring),
-              curve: Curves.ease)
+              curve: Curves.linearToEaseOut)
           ?.whenComplete(() {
         if (_isRefreshProcess || _isLoadingProcess) {
           if (isScrollNormal && _refreshStatus == RefreshStatus.reset) {
@@ -512,7 +518,7 @@ class _PullRefreshRender extends RenderBox
       scroller
           ?.animateTo(refreshScrollExtent,
               duration: Duration(milliseconds: animationDuring),
-              curve: Curves.ease)
+              curve: Curves.linearToEaseOut)
           ?.whenComplete(() {
         _tryHolding();
       });
@@ -531,7 +537,7 @@ class _PullRefreshRender extends RenderBox
   void finish({int delay: 300}) {
     finish() {
       _refreshStatus = RefreshStatus.reset;
-      if (_onPullFinish != null) _onPullFinish(this);
+      _onPullFinish();
       _animate2Status();
     }
 
@@ -545,21 +551,50 @@ class _PullRefreshRender extends RenderBox
   }
 
 ///////////////////////////////////分割线///////////////////////////////////////////
+  void addOnInitializeCallback(
+          String callbackName, OnInitializeCallback onInitializeCall) =>
+      _onInitializes[callbackName] = onInitializeCall;
 
-  set onIniztialize(onInitialize) => _onInitialize = onInitialize;
+  void addOnPullChangeCallback(
+          String callbackName, OnPullChangeCallback onPullChangeCall) =>
+      _onPullChanges[callbackName] = onPullChangeCall;
 
-  set onPullChange(onPullChange) => _onPullChange = onPullChange;
+  void addOnPullHoldTriggerCallback(String callbackName,
+          OnPullHoldTriggerCallback onPullHoldTriggerCall) =>
+      _onPullHoldTriggers[callbackName] = onPullHoldTriggerCall;
+
+  void addOnPullHoldUnTriggerCallback(String callbackName,
+          OnPullHoldUnTriggerCallback onPullHoldUnTriggerCall) =>
+      _onPullHoldUnTriggers[callbackName] = onPullHoldUnTriggerCall;
+
+  void addOnPullHoldingCallback(
+          String callbackName, OnPullHoldingCallback onPullHoldingCall) =>
+      _onPullHoldings[callbackName] = onPullHoldingCall;
+
+  void addOnPullFinishCallback(
+          String callbackName, OnPullFinishCallback onPullFinishCall) =>
+      _onPullFinishes[callbackName] = onPullFinishCall;
+
+  void addOnPullResetCallback(
+          String callbackName, OnPullResetCallback onPullResetCall) =>
+      _onPullResets[callbackName] = onPullResetCall;
+
+  set onInitialize(onInitialize) => addOnInitializeCallback(_TAG, onInitialize);
+
+  set onPullChange(onPullChange) => addOnPullChangeCallback(_TAG, onPullChange);
 
   set onPullHoldTrigger(onPullHoldTrigger) =>
-      _onPullHoldTrigger = onPullHoldTrigger;
+      addOnPullHoldTriggerCallback(_TAG, onPullHoldTrigger);
 
-  set holdUnTrigger(holdUnTrigger) => _onPullHoldUnTrigger = holdUnTrigger;
+  set onPullHoldUnTrigger(onPullHoldUnTrigger) =>
+      addOnPullHoldUnTriggerCallback(_TAG, onPullHoldUnTrigger);
 
-  set onPullHolding(onPullHolding) => _onPullHolding = onPullHolding;
+  set onPullHolding(onPullHolding) =>
+      addOnPullHoldingCallback(_TAG, onPullHolding);
 
-  set onPullFinish(onPullFinish) => _onPullFinish = onPullFinish;
+  set onPullFinish(onPullFinish) => addOnPullFinishCallback(_TAG, onPullFinish);
 
-  set onPullReset(onPullReset) => _onPullReset = onPullReset;
+  set onPullReset(onPullReset) => addOnPullResetCallback(_TAG, onPullReset);
 
   bool get isOverTop => _hScroll < minScrollExtent ?? _hScroll;
 
@@ -586,9 +621,9 @@ class _PullRefreshRender extends RenderBox
   bool get isUnBelowLoadingExtend =>
       hasFooter ? _hScroll >= loadingScrollExtent : false;
 
-  double get minScrollExtent => scroller?.position?.minScrollExtent;
+  double get minScrollExtent => _scrollMetrics?.minScrollExtent;
 
-  double get maxScrollExtent => scroller?.position?.maxScrollExtent;
+  double get maxScrollExtent => _scrollMetrics?.maxScrollExtent;
 
   double get refreshHeight => _refreshHeight;
 
@@ -601,7 +636,9 @@ class _PullRefreshRender extends RenderBox
       _loadingHeight = loadingHeight ?? _loadingHeight;
 
   /// 是否处在正常滚动范围（不出在isOverTop、isOverBottom状态）
-  bool get isScrollNormal => !(scroller?.position?.outOfRange ?? true);
+  bool get isScrollNormal {
+    return !(_scrollMetrics?.outOfRange ?? true);
+  }
 
   bool get enableAutoLoading => _enableAutoLoading;
 
@@ -622,7 +659,9 @@ class _PullRefreshRender extends RenderBox
 
   ScrollController get scroller {
     if (_scrollElement != null && _scrollElement.widget is Scrollable) {
-      return (_scrollElement.widget as Scrollable).controller;
+      ScrollController controller =
+          (_scrollElement.widget as Scrollable).controller;
+      return controller;
     }
     return null;
   }
@@ -650,18 +689,26 @@ class _PullRefreshRender extends RenderBox
       this._refreshHeight,
       this._loadingHeight,
       this._enableAutoLoading,
-      this._onInitialize,
-      this._onPullChange,
-      this._onPullHoldTrigger,
-      this._onPullHoldUnTrigger,
-      this._onPullHolding,
-      this._onPullFinish,
-      this._onPullReset,
+      OnInitializeCallback _onInitialize,
+      OnPullChangeCallback _onPullChange,
+      OnPullHoldTriggerCallback _onPullHoldTrigger,
+      OnPullHoldUnTriggerCallback _onPullHoldUnTrigger,
+      OnPullHoldingCallback _onPullHolding,
+      OnPullFinishCallback _onPullFinish,
+      OnPullResetCallback _onPullReset,
       {List<RenderBox> children,
       Overflow clip}) {
     overFlow = clip;
     streamHandle = handle;
+    onInitialize = _onInitialize;
+    onPullChange = _onPullChange;
+    onPullHoldTrigger = _onPullHoldTrigger;
+    onPullHoldUnTrigger = _onPullHoldUnTrigger;
+    onPullHolding = _onPullHolding;
+    onPullFinish = _onPullFinish;
+    onPullReset = _onPullReset;
     addAll(children);
+    _onInitialize(this);
   }
 
   @override
@@ -685,9 +732,6 @@ class _PullRefreshRender extends RenderBox
       );
     }
   }
-
-  /// 是否初始化
-  bool _isInitialize = false;
 
   @override
   void performLayout() {
@@ -723,11 +767,6 @@ class _PullRefreshRender extends RenderBox
           height: layoutHeight,
         )
         .biggest;
-
-    if (_onInitialize != null && !_isInitialize) {
-      _isInitialize = true;
-      _onInitialize(this);
-    }
   }
 
   @override
@@ -742,6 +781,26 @@ class _PullRefreshRender extends RenderBox
       physics?.status(PhysicsStatus.normal);
     }
   }
+
+  void _onInitialize() =>
+      _onInitializes.forEach((_, callback) => callback(this));
+
+  void _onPullChange(double percent) =>
+      _onPullChanges.forEach((_, callback) => callback(this, percent));
+
+  void _onPullHoldTrigger() =>
+      _onPullHoldTriggers.forEach((_, callback) => callback(this));
+
+  void _onPullHoldUnTrigger() =>
+      _onPullHoldUnTriggers.forEach((_, callback) => callback(this));
+
+  void _onPullHolding() =>
+      _onPullHoldings.forEach((_, callback) => callback(this));
+
+  void _onPullFinish() =>
+      _onPullFinishes.forEach((_, callback) => callback(this));
+
+  void _onPullReset() => _onPullResets.forEach((_, callback) => callback(this));
 }
 
 class _PullRefreshElement extends MultiChildRenderObjectElement {
@@ -750,23 +809,47 @@ class _PullRefreshElement extends MultiChildRenderObjectElement {
   @override
   void mount(Element parent, newSlot) {
     super.mount(parent, newSlot);
-    findScrollElement(this);
+    findContent2ScrollElement();
   }
 
   @override
   void update(MultiChildRenderObjectWidget newWidget) {
     super.update(newWidget);
-    findScrollElement(this);
+    findContent2ScrollElement();
+  }
+
+  findContent2ScrollElement() {
+    Element element = children.singleWhere((e) => e is _FindScrollElement);
+    findScrollElement(element);
   }
 
   void findScrollElement(Element element) {
-    if (element.widget is Scrollable) {
+    if (element.widget is! _WidgetRender && element.widget is Scrollable) {
       _PullRefreshRender render = findRenderObject() as _PullRefreshRender;
       render.scrollableElement = element;
       return;
     }
+
     element.visitChildren(findScrollElement);
   }
+}
+
+class _Content extends SingleChildRenderObjectWidget {
+  const _Content(Widget child, {Key key}) : super(key: key, child: child);
+
+  @override
+  SingleChildRenderObjectElement createElement() {
+    return _FindScrollElement(this);
+  }
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderProxyBox();
+  }
+}
+
+class _FindScrollElement extends SingleChildRenderObjectElement {
+  _FindScrollElement(Widget widget) : super(widget);
 }
 
 class _RefreshParentData extends ContainerBoxParentData<RenderBox> {}
