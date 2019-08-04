@@ -209,14 +209,22 @@ class _PullRefreshRender extends RenderBox
   /// 底部渲染器
   _WidgetRender _footerRender;
 
+  /// 是否要开始刷新
   bool _isToRefreshHolding = false;
+
+  /// 是否要开始加载
   bool _isToLoadingHolding = false;
 
+  /// 刷新过程动画时间
   int animationDuring = 400;
 
+  /// 刷新高度
   double _refreshHeight;
+
+  /// 加载高度
   double _loadingHeight;
 
+  /// 自动加载是否可用
   bool _enableAutoLoading;
 
   OnInitializeCallback _onInitialize;
@@ -354,7 +362,10 @@ class _PullRefreshRender extends RenderBox
 
   void _onMoving() {
     void autoLoading() {
-      if (_enableAutoLoading && _offset > 0) {
+      if (!_isToLoadingHolding &&
+          !_isToRefreshHolding &&
+          _enableAutoLoading &&
+          _offset > 0) {
         bool toHolding = _hScroll + _offset >= maxScrollExtent;
         if (toHolding) _tryHolding(toHolding: toHolding);
       }
@@ -439,21 +450,24 @@ class _PullRefreshRender extends RenderBox
         if (!isUnBelowLoadingExtend) to = _hScroll;
       }
     }
+    bool holdFlag() {
+      if (_isRefreshProcess || _isLoadingProcess) {
+        return false;
+      }
+      if (isToRefreshHolding) {
+        return _isRefreshProcess = true;
+      } else if (isToLoadingHolding) {
+        return _isLoadingProcess = true;
+      }
+      return false;
+    }
 
     if (isScrollNormal) {
-      _tryReset();
-    } else {
-      void holdFlag() {
-        if (isToRefreshHolding) {
-          _isRefreshProcess = true;
-        } else if (isToLoadingHolding) {
-          _isLoadingProcess = true;
-        }
+      if (!holdFlag()) {
+        _tryReset();
       }
-
-      if (enableAutoLoading && !_isToRefreshHolding) {
-        physics.status(PhysicsStatus.bouncing);
-        holdFlag();
+    } else {
+      if (holdFlag()) {
         return;
       }
       physics?.scrollAble = false;
@@ -463,7 +477,7 @@ class _PullRefreshRender extends RenderBox
               curve: Curves.ease)
           ?.whenComplete(() {
         if (_isRefreshProcess || _isLoadingProcess) {
-          if (isScrollNormal) {
+          if (isScrollNormal && _refreshStatus == RefreshStatus.reset) {
             _tryReset();
           }
           return;
@@ -672,6 +686,7 @@ class _PullRefreshRender extends RenderBox
     }
   }
 
+  /// 是否初始化
   bool _isInitialize = false;
 
   @override

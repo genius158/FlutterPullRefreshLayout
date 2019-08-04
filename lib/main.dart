@@ -70,8 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ScrollPhysics _refreshLayoutPhysics =
-      new PullRefreshPhysics(parent: BouncingScrollPhysics());
-//      new PullRefreshPhysics();
+//      new PullRefreshPhysics(parent: BouncingScrollPhysics());
+      new PullRefreshPhysics();
 
 //      BouncingScrollPhysics();
   String _text = "正常";
