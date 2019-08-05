@@ -597,9 +597,11 @@ class _PullRefreshRender extends RenderBox
 
   set onPullReset(onPullReset) => addOnPullResetCallback(_TAG, onPullReset);
 
-  bool get isOverTop => _hScroll < minScrollExtent ?? _hScroll;
+  bool get isOverTop =>
+      _hScroll < (minScrollExtent == null ? _hScroll : minScrollExtent);
 
-  bool get isOverBottom => _hScroll > maxScrollExtent ?? _hScroll;
+  bool get isOverBottom =>
+      _hScroll > (maxScrollExtent == null ? _hScroll : maxScrollExtent);
 
   bool get hasHeader => _headerRender != null;
 
@@ -607,10 +609,11 @@ class _PullRefreshRender extends RenderBox
 
   @override
   double get refreshScrollExtent =>
-      -refreshHeight + minScrollExtent ?? _hScroll;
+      -refreshHeight + (minScrollExtent == null ? _hScroll : minScrollExtent);
 
   @override
-  double get loadingScrollExtent => loadingHeight + maxScrollExtent ?? _hScroll;
+  double get loadingScrollExtent =>
+      loadingHeight + (maxScrollExtent == null ? _hScroll : maxScrollExtent);
 
   double get getScrollPixel => _hScroll;
 
