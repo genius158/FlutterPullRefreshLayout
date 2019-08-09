@@ -19,9 +19,9 @@ class PullRefreshPhysics extends ScrollPhysics {
     }
   }
 
-  bool status(PhysicsStatus status) {
+  set status(PhysicsStatus status) {
     if (status == null) {
-      return false;
+      return;
     }
 
     bool isPhysicsSame = _scrollPhysics != null &&
@@ -38,13 +38,13 @@ class PullRefreshPhysics extends ScrollPhysics {
       }
     }
     _status = status;
-    return isPhysicsSame;
+    return;
   }
 
   PullRefreshPhysics({PhysicsStatus status, ScrollPhysics parent})
       : super(parent: parent) {
     _parent = parent;
-    this.status(status ?? PhysicsStatus.normal);
+    this.status = status ?? PhysicsStatus.normal;
   }
 
   @override
@@ -57,7 +57,7 @@ class PullRefreshPhysics extends ScrollPhysics {
     } else {
       _parent = _parent.applyTo(buildParent(ancestor));
     }
-    status(_status);
+    status = _status;
     return this;
   }
 

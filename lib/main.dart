@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'pullrefresharound.dart';
+import 'phoenix_header.dart';
 import 'pullrefreshlayout.dart';
-import 'pullrefreshphysics.dart';
 
 //void main() => Future.delayed(Duration(seconds: 5)).then((_) {
 //      runApp(MyApp());
@@ -71,108 +70,63 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ScrollPhysics _refreshLayoutPhysics =
       new PullRefreshPhysics(parent: BouncingScrollPhysics());
+
+  RefreshControl _control = new RefreshControl();
+
 //      new PullRefreshPhysics();
   String _text = "正常";
   int size = 0;
 
-  RefreshControl _refreshControl;
-
   @override
   Widget build(BuildContext context) {
+    print("buildbuildbuildbuildbuildbuildbuildbuild");
 //    _refreshControl?.autoRefresh(delay: 5000);
-
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: InnerText(widget.title),
+        title: Text(widget.title),
       ),
       body: PullRefreshLayout(
-        onInitialize: (control) {
-          _refreshControl = control;
-          _refreshControl?.autoRefresh();
-        },
-        enableAutoLoading: true,
-        onPullChange: (control, value) {
-          if (control.isRefreshProcess()) {
-//            print("PullRefreshLayout isRefreshProcess onPullChange11 " + value.toString());
-          } else if (control.isLoadingProcess()) {
-//            print("PullRefreshLayout isLoadingProcess onPullChange " + value.toString());
-          }
-        },
-        onPullFinish: (control) {
-          if (control.isRefreshProcess()) {
-            print("PullRefreshLayout isRefreshProcess onPullFinish ");
-          } else if (control.isLoadingProcess()) {
-            print("PullRefreshLayout isLoadingProcess onPullFinish ");
-          }
-        },
-        onPullReset: (control) {
-          setState(() {
-            if (control.isRefreshProcess()) {
-              _text = "正常";
-              print("PullRefreshLayout isRefreshProcess onPullReset ");
-            } else if (control.isLoadingProcess()) {
-              print("PullRefreshLayout isLoadingProcess onPullReset");
-            }
-          });
-        },
-        onPullHoldUnTrigger: (control) {
-          setState(() {
-            if (control.isRefreshProcess()) {
-              _text = "不触发";
-            }
-          });
-        },
-        onPullHoldTrigger: (control) {
-          setState(() {
-            if (control.isRefreshProcess()) {
-              _text = "触发";
-            }
-          });
-        },
+        control: _control,
         onPullHolding: (control) {
-          setState(() {
-            if (control.isRefreshProcess()) {
-              _text = "正在刷新";
-              print(
-                  "PullRefreshLayout isRefreshProcess onPullHolding  loading");
-            } else if (control.isLoadingProcess()) {
-              print(
-                  "PullRefreshLayout isLoadingProcess onPullHolding  loading");
-            }
-          });
+
           Future.delayed(Duration(seconds: 1)).then((_) {
-            setState(() {
-              if (control.isLoadingProcess()) {
+            if(control.isLoadingProcess()){
+              setState(() {
                 size += 10;
-              } else if (control.isRefreshProcess()) {
-                _text = "刷新完成";
-              }
-            });
+              });
+            }
             control.finish();
           });
         },
-        header: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 70,
-          child: Center(
-            child: InnerText(
-              _text,
-              style: TextStyle(
-                fontSize: 30,
-              ),
-            ),
-          ),
+        refreshHeight: 100,
+        header: PhoenixHeaderWidget(
+          control: _control,
+          height: 100,
         ),
+//        header: Container(
+//          color: Colors.red,
+//          width: double.infinity,
+//          height: 70,
+//          child: Center(
+//            child: InnerText(
+//              _text,
+//              style: TextStyle(
+//                fontSize: 30,
+//              ),
+//            ),
+//          ),
+//        ),
+        enableAutoLoading: true,
+        footerStatus: IndicatorStatus.follow,
         loadingHeight: 70,
         footer: Container(
           color: Colors.red,
           width: double.infinity,
           height: 100,
           child: Center(
-            child: InnerText(
+            child: Text(
               "test",
               style: TextStyle(
                 fontSize: 30,
@@ -180,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ),
-        child: getScrollTest(),
+        child: getListTest(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -191,199 +145,28 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   getListTest() {
+    List widgets = List<Widget>();
+    for (int i = 0; i < 20; i++) {
+      widgets.add(
+        InnerText(
+          'InnerText $_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+      );
+    }
+
+    for (int i = 0; i < size; i++) {
+      widgets.add(
+        InnerText(
+          'InnerText $_counter',
+          style: Theme.of(context).textTheme.display1,
+        ),
+      );
+    }
+
     return ListView(
       physics: _refreshLayoutPhysics,
-      children: <Widget>[
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-        InnerText(
-          'You have pushed the button this many times:',
-        ),
-        InnerText(
-          '$_counter',
-          style: Theme.of(context).textTheme.display1,
-        ),
-      ],
+      children: widgets,
     );
   }
 
@@ -522,18 +305,32 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class InnerText extends Text {
-  const InnerText(String data, {TextStyle style}) : super(data, style: style);
+class InnerText extends StatelessWidget {
+  final text;
+  final style;
+
+  const InnerText(this.text, {this.style});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      child: super.build(context),
+      child: Container(
+        height: 50,
+        color: Colors.lightBlue,
+        child: Text(
+          text,
+          style: style,
+        ),
+      ),
       onTap: () {
         showDialog(
             context: context,
             builder: (_) {
-              return Text("" + this.toString());
+              return Container(
+                width: double.infinity,
+                child: Text("" + this.toString()),
+                color: Colors.lightBlue,
+              );
             });
       },
     );
