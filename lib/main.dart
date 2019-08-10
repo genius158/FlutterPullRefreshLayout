@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'normal_footer.dart';
 import 'phoenix_header.dart';
 import 'pullrefreshlayout.dart';
 
@@ -69,18 +70,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ScrollPhysics _refreshLayoutPhysics =
-      new PullRefreshPhysics(parent: BouncingScrollPhysics());
+//      new PullRefreshPhysics(parent: BouncingScrollPhysics());
+      new PullRefreshPhysics();
 
   RefreshControl _control = new RefreshControl();
-
-//      new PullRefreshPhysics();
-  String _text = "正常";
   int size = 0;
 
   @override
   Widget build(BuildContext context) {
     print("buildbuildbuildbuildbuildbuildbuildbuild");
-//    _refreshControl?.autoRefresh(delay: 5000);
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -89,15 +87,29 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: PullRefreshLayout(
         control: _control,
+        onInitialize: (control) => control.autoRefresh(),
+        onPullHoldUnTrigger: (control) => print(
+            "onPullHoldUnTrigger  " + control.isLoadingProcess().toString()),
+        onPullHoldTrigger: (control) => print(
+            "onPullHoldTrigger  " + control.isLoadingProcess().toString()),
+        onPullFinish: (control) =>
+            print("onPullFinish  " + control.isLoadingProcess().toString()),
+        onPullReset: (control) =>
+            print("onPullReset  " + control.isLoadingProcess().toString()),
         onPullHolding: (control) {
-
           Future.delayed(Duration(seconds: 1)).then((_) {
-            if(control.isLoadingProcess()){
+            if (control.isLoadingProcess()) {
               setState(() {
                 size += 10;
               });
+              control.finishLoading(complete: size > 10);
+            } else {
+              setState(() {
+                size = 0;
+                control.isLoadingAble = true;
+              });
+              control.finishRefresh();
             }
-            control.finish();
           });
         },
         refreshHeight: 100,
@@ -119,21 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
 //          ),
 //        ),
         enableAutoLoading: true,
-        footerStatus: IndicatorStatus.follow,
         loadingHeight: 70,
-        footer: Container(
-          color: Colors.red,
-          width: double.infinity,
-          height: 100,
-          child: Center(
-            child: Text(
-              "test",
-              style: TextStyle(
-                fontSize: 30,
-              ),
-            ),
-          ),
-        ),
+        footer: NormalFooterWidget(_control),
         child: getListTest(),
       ),
       floatingActionButton: FloatingActionButton(

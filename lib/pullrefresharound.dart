@@ -2,7 +2,7 @@ import 'pullrefreshlayout.dart';
 
 typedef OnInitializeCallback = void Function(RefreshControl control);
 typedef OnPullChangeCallback = void Function(
-    RefreshControl control, double percent);
+    RefreshControl control, double offset);
 // 数据重置调用
 typedef OnPullHoldTriggerCallback = void Function(RefreshControl control);
 typedef OnPullHoldUnTriggerCallback = void Function(RefreshControl control);
@@ -25,6 +25,8 @@ abstract class RefreshData {
   bool get enableAutoLoading => false;
 
   RefreshStatus get refreshStatus => null;
+
+  bool get isFooterKeep=>false;
 }
 
 enum PhysicsStatus { normal, bouncing }

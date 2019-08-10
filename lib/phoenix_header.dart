@@ -28,13 +28,13 @@ class PhoenixHeaderWidgetState extends State<PhoenixHeaderWidget> {
   double _pulledExtent = 0;
   double _indicatorExtent = 0;
 
-  void onPullChangeCall(RefreshControl control, double percent) {
+  void onPullChangeCall(RefreshControl control, double offset) {
     if (control.isRefreshProcess()) {
-      double pull = percent.abs() * widget.height;
+      double pull = offset.abs();
       _pulledExtent = pull;
       setState(() {});
-    } else if (percent == 0 && (_pulledExtent != widget.height)) {
-      _pulledExtent = widget.height;
+    } else if (offset == 0 && _pulledExtent != 0) {
+      _pulledExtent = 0;
       setState(() {});
     }
   }
@@ -110,7 +110,6 @@ class PhoenixHeaderWidgetState extends State<PhoenixHeaderWidget> {
     isRotateSun = widget.control.isRefreshProcess() &&
         widget.control.refreshStatus == RefreshStatus.holding;
 
-    print("_indicatorExtent  " + "  " + _pulledExtent.toString());
     return Stack(
       children: <Widget>[
         // 天空
