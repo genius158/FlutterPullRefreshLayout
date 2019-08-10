@@ -578,7 +578,7 @@ class _PullRefreshRender extends RenderBox
 
   @override
   void finishRefresh({int delay: 300, bool complete: false}) {
-    if (!isRefreshAble) {
+    if (!isRefreshAble || !_isToRefreshHolding) {
       return;
     }
     _isRefreshAble = !complete;
@@ -588,7 +588,7 @@ class _PullRefreshRender extends RenderBox
   @override
   void finishLoading({int delay: 300, bool complete: false, bool keep: true}) {
     _isFooterKeep = keep;
-    if (!isLoadingAble) {
+    if (!isLoadingAble || !_isToLoadingHolding) {
       return;
     }
     _isLoadingAble = !complete;
